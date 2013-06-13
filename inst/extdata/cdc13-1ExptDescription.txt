@@ -1,0 +1,9 @@
+Barcode	Start.Time	Treatment	Medium	Screen	Library	Plate	RepQuad
+DLR00012733	2009-11-09_19-26-14	27	SD/MSG -ARG -HIS -LEU -LYS +Canavanine +G418 +Hygromycin +Thialysine	Adam cdc13-1 SDLV2 REP1	BooneSDLV2	15	1
+DLR00013888	2009-11-16_18-15-23	27	SD/MSG -ARG -HIS -LEU -LYS +Canavanine +G418 +Hygromycin +Thialysine	Adam cdc13-1 SDLV2 REP2	BooneSDLV2	15	2
+DLR00016390	2009-11-23_18-33-21	27	SD/MSG -ARG -HIS -LEU -LYS +Canavanine +G418 +Hygromycin +Thialysine	Adam cdc13-1 SDLV2 REP3	BooneSDLV2	15	3
+DLR00015083	2009-12-07_17-29-41	27	SD/MSG -ARG -HIS -LEU -LYS +Canavanine +G418 +Hygromycin +Thialysine	Adam cdc13-1 SDLV2 REP4	BooneSDLV2	15	4
+DLR00013341	2009-11-11_20-36-51	27	SD/MSG -ARG -HIS -LEU -LYS +Canavanine +G418 +Hygromycin +Thialysine	Adam cdc13-1 SDLV3 REP1	BooneSDLV3	15	1
+DLR00013773	2009-11-17_16-52-02	27	SD/MSG -ARG -HIS -LEU -LYS +Canavanine +G418 +Hygromycin +Thialysine	Adam cdc13-1 SDLV3 REP2	BooneSDLV3	15	2
+DLR00014614	2009-11-25_17-08-24	27	SD/MSG -ARG -HIS -LEU -LYS +Canavanine +G418 +Hygromycin +Thialysine	Adam cdc13-1 SDLV3 REP3	BooneSDLV3	15	3
+DLR00015735	2009-12-14_17-42-28	27	SD/MSG -ARG -HIS -LEU -LYS +Canavanine +G418 +Hygromycin +Thialysine	Adam cdc13-1 SDLV3 REP4	BooneSDLV3	15	4

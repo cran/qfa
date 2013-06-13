@@ -1,0 +1,531 @@
+GroupName	GroupID	GroupORFs
+Checkpoint sliding clampandloader	Func.	YOR368W YLR288C YPL194W YER173W
+Yku interactors	Func.	YBR274W YBR136W YDL101C YDR217C YOR033C YOR368W YLR288C YPL194W YER173W
+Lydall lab interesting genes	Func.	YBR274W YBR136W YDL101C YDR217C YOR033C YOR368W YLR288C YPL194W YER173W YIL009C-A YLR233C TLC1 YLR318W YMR106C YMR284W YDR369C YMR224C YNL250W YBL088C YHR031C YML061C YMR080C YHR077C YGR072W YDR206W
+nuclear telomere cap complex (GO)	Func.	YBR275C YDL042C YDL220C YDR082W YDR227W YGR099W YLR010C YLR150W YLR442C YLR453C YNL216W
+waif/stray repair proteins	Func.	YJL092W YLR032W YER095W YML061C YKL113C 
+Chk1 targets	Func.	YPR145W YBR252W YJR082C YBR177C 
+MTC/RTCs	Func.	YBR255W YDR128W YEL033W YGL226W YHR151C YJL123C YKL098W YNL254C YOL138C YOR118W YPL183W-A YBR147W YHR087W 
+SEA complex (RTC1/MTC5 etc)	Func.	YOL138C YBL104C YDR128W YJR138W 
+adjacent to STN1/TEN1	Func.	YDR083W YDRO81C YLR009W 
+NMD genes	Func.	YMR080C YHR077C YGR072W 
+Unfolded protein response	Func.	YHR079C YFL031W YJL034W 
+Spermidine synthase complex	Func.	YKL184W YOL052C YPR069C 
+Spp381-Prp38 complex	Func.	YBR152W YGR075C
+Asf1-Rad53 complex	Func.	YJL115W YPL153C
+Pan1-End3 complex	Func.	YIR006C YNL084C
+Sod1-Css1 heterodimer	Func.	YJR104C YMR038C
+HAT-A4 complex	Func.	YBR010W YBR009C YNL030W YEL056W YPL001W YLL022C YOL054W YNL031C
+Ste11-Ste50 complex	Func.	YLR362W YCL032W
+Cdc48-Ufd1-Npl4 complex	Func.	YDL126C YBR170C YGR048W
+Cdc48-Shp1 complex	Func.	YBL058W YDL126C
+Sit4-Sap155 complex	Func.	YDL047W YFR040W
+Ste12-Dig1-Dig2 complex	Func.	YPL049C YHR084W YDR480W
+Rvs161-Rvs167 complex	Func.	YCR009C YDR388W
+She2-She3-Myo4 complex	Func.	YAL029C YBR130C YKL130C
+Ubp3-Bre5 complex	Func.	YNR051C YER151C
+Rad6-Rad18 complex	Func.	YGL058W YCR066W
+Rtt109-Vps75 complex	Func.	YLL002W YNL246W
+Csm3-Tof1 complex	Func.	YMR048W YNL273W
+Psr2-Psr1-Whi2 complex	Func.	YLR019W YLL010C YOR043W
+Rad23-Png1 complex	Func.	YEL037C YPL096W
+Tim44-Ssc1 heterodimer	Func.	YIL022W YJR045C
+Dop1-Mon2 complex	Func.	YDR141C YNL297C
+Rsp5-Ubp2-Rup1 deubiquitinating enzyme complex	Func.	YER125W YOR124C YOR138C
+Pho80-Pho81-Pho85 CDK-cyclin complex	Func.	YGR233C YOL001W YPL031C
+Trm112-Trm11 complex	Func.	YNR046W YOL124C
+Dug2-Dug3 complex	Func.	YBR281C YNL191W
+Dph1-Dph2-Dph3 complex	Func.	YBL071W-A YIL103W YKL191W
+Scs2-Opi1 complex	Func.	YER120W YHL020C
+Ula1-Uba3 enzyme complex	Func.	YPL003W YPR066W
+Nam1-Sls1 complex	Func.	YDL044C YLR139C
+ER SNARE Use1	Func.	YDR498C YLR440C YNL258C YKL196C YLR268W YGL145W YOR075W YGL098W
+Pba1-Pba2 complex	Func.	YKL206C YLR199C YBR173C
+Gyl1-Gyp5 complex	Func.	YMR192W YPL249C
+Rtg1-Rtg3 bHLH-Zip complex	Func.	YBL103C YOL067C
+Sit4-Sap190 complex	Func.	YDL047W YKR028W
+Rtt103-Rai1-Rat1 complex	Func.	YDR289C YGL246C YOR048C
+R2TP complex	Func.	YCR060W YHR034C YDR190C YPL235W
+adenylyl cyclase complex	Func.	YJL005W YNL138W
+Ssc1-Mge1 complex	Func.	YJR045C YOR232W
+Dcs1-Dcs2 heterodimer	Func.	YLR270W YOR173W
+Kap114-Nap1 histone complex	Func.	YBL003C YGL241W YBL002W YOL012C YKR048C
+Grh1-Bug1 complex	Func.	YDL099W YDR517W
+Mad1-Mad2 complex	Func.	YGL086W YJL030W
+Ic-CPY complex	Func.	YLR178C YMR297W
+Mlh2-Mlh1 heterodimer	Func.	YLR035C YMR167W
+Sac3-Thp1 complex	Func.	YDR159W YOL072W
+tRNA methyltransferase complex	Func.	YDL201W YDR165W
+Tlg1 SNARE complex	Func.	YBL050W YDR468C YGL095C YOL018C
+ribosome-associated complex	Func.	YGR285C YHR064C YJL080C
+Trm9-Trm112 complex	Func.	YML014W YNR046W
+prohibitin complex	Func.	YGR132C YGR231C
+succinyl-CoA ligase	Func.	YGR244C YOR142W
+Gsp1-Prp20 complex	Func.	YGL097W YLR293C YOR185C
+Kic1-Sog2 complex	Func.	YHR102W YOR353C
+Nrd1-Nab3-Sen1 termination complex	Func.	YLR430W YNL251C YPL190C YMR239C
+Ssk1-Ssk2 complex	Func.	YLR006C YNR031C
+Vti1-Pep12 complex	Func.	YMR197C YOR036W
+Pcl7-Pho85 CDK-cyclin complex	Func.	YPL031C YIL050W
+Prs1-Prs3 heterodimer	Func.	YHL011C YKL181W
+Vac14-Fig4 complex	Func.	YLR386W YNL325C
+Cpr6-Hsc82-Sti1-Hsp82 complex	Func.	YLR216C YMR186W YOR027W YPL240C
+Bur1-Bur2 CDK-cyclin complex	Func.	YPR161C YLR226W
+Bub1-Bub3 kinase complex	Func.	YGR188C YOR026W
+Sis2-Ykl088w-Vhs3 complex	Func.	YKR072C YKL088W YOR054C
+putative Slu7-Prp18 complex	Func.	YDR088C YGR006W
+COMA complex	Func.	YBR107C YBR211C YDR318W YJR135C YGR179C YDR254W YPL018W YLR381W YDR383C YLR315W YPR046W
+TEL complex	Func.	YDR227W YDL042C
+nucleoporin Nup84 subcomplex	Func.	YGL100W YDL116W YGL092W YKL057C YJR042W YLR208W
+Dcp1-Dcp2 decapping enzyme complex	Func.	YBR094W YEL015W YOL149W YNL118C
+Ulp1 nuclear pore complex	Func.	YLR347C YMR308C YPL020C
+TFIIK complex	Func.	YDL108W YDR460W YPR025C
+Spt6-Spn1 elongator factor complex	Func.	YGR116W YPR133C
+cleavage factor I complex	Func.	YDR228C YGL044C YOR250C YMR061W
+Cln-Cdc28 protein kinase complex	Func.	YMR199W YBR160W YKR091W YLR210W YLR079W YDL155W YPL256C YBR135W
+Isw2-Itc1 complex	Func.	YGL133W YOR304W
+nucleoporin Nup82 subcomplex	Func.	YIL115C YJL061W YJL041W YER107C YMR047C
+Snx4-Snx41 heterodimer	Func.	YJL036W YDR425W
+Nup60-Nup2 nuclear pore complex	Func.	YAR002W YLR335W YLR347C
+Erp1-Erp2-Emp24-Erv25 p24 complex	Func.	YAL007C YAR002C-A YGL200C YML012W
+nucleoporin Nsp1 subcomplex	Func.	YFR002W YGL172W YGR119C YJL041W
+HDA complex	Func.	YDR295C YNL021W YPR179C
+core H-ACA snoRNP	Func.	YDL208W YHR072W-A YHR089C YLR175W YNL308C
+Atg11-Atg17-Atg29-Cis1 complex	Func.	YPR049C YPL166W YDR022C YLR423C
+Clathrin	Func.	YGL206C YGR167W
+Ctf18 RFC-like complex	Func.	YCL016C YHR191C YMR078C
+commitment complex 2	Func.	YKL074C YLR116W
+Sec24-Sfb2-Sec16-Sec23 complex	Func.	YIL109C YNL049C YPL085W YPR181C
+vacuolar proton-transporting V-type ATPase, V0 domain	Func.	YPR149W YKL119C YLR447C YOR270C
+Hrd1 ubiquitin ligase ERAD-L complex	Func.	YDR057W YLR207W YOL013C YML029W
+anthranilate synthase complex	Func.	YER090W YKL211C
+nuclear cohesin complex	Func.	YJL074C YFL008W YIL026C YDL003W
+protein kinase CK2 complex	Func.	YGL019W YIL035C YOR039W YOR061W
+phosphatidylinositol 3-kinase complex II	Func.	YBR097W YLR360W YPL120W YLR240W
+mitochondrial proton-transporting ATP synthase complex	Func.	YBL099W YBR039W YDR298C YKL016C
+GINS complex	Func.	YDR013W YJL072C YDR489W YOL146W
+mitochondtrial large ribosomal subunit	Func.	YGR076C YDR405W YBR282W YHR147C YBL038W YDR462W YOR150W YBR122C YCR071C YDR237W YDR116C YDR322W YLR439W YDR296W YCR046C YNL252C YMR193W YGR220C YKL167C YKR006C YJL063C YKR085C YML025C YMR024W YNL005C YLR312W-A YPL183W-A YMR098C YML009C YMR225C YNL177C YNL284C YPR100W
+ribonuclease H2 complex	Func.	YDR279W YNL072W
+SUMO activating enzyme complex	Func.	YDR390C YPR180W
+tRNA (m1A) methyltransferase complex	Func.	YJL125C YNL062C
+polarisome	Func.	YER149C YLL021W
+TRAMP complex	Func.	YDL175C YJL050W YOL115W
+transcription factor TFIIA complex	Func.	YKL058W YOR194C
+CPF complex	Func.	YMR061W YER133W YDR195W YGR156W YAL043C YNL222W YDR301W YKL059C YJR093C YPR107C YLR115W YLR277C YKR002W YNL317W YKL018W YOR179C
+serine C-palmitoyltransferase complex	Func.	YDR062W YMR296C
+Cyc8-Tup1 corepressor complex	Func.	YCR084C YBR112C
+delta DNA polymerase complex	Func.	YDL102W YJR006W YJR043C
+snRNP U2	Func.	YDL043C YJL203W YMR240C YDL030W YPL213W YML049C YMR288W
+AP-3 adaptor complex	Func.	YBR288C YGR261C YJL024C YPL195W
+Ric1-Rgp1 complex	Func.	YDR137W YLR039C
+Ndc80 complex	Func.	YER018C YIL144W YOL069W YMR117C
+Rpd3L complex	Func.	YDR207C YDL076C YAL013W YBR095C YNL097C YIL084C YMR263W YPL181W YOL004W YNL330C YPL139C YMR075W
+methionyl glutamyl tRNA synthetase complex	Func.	YGL245W YGL105W YGR264C
+protein phosphatase type 2A complex	Func.	YAL016W YDL188C YGL190C YDL134C YMR273C YML109W YOR014W
+TORC1 complex	Func.	YHR186C YJR066W
+epsilon DNA polymerase complex	Func.	YDR121W YBR278W YNL262W YPR175W
+mitochondrial oxoglutarate dehydrogenase complex	Func.	YFR049W YFL018C YDR148C YIL125W
+NatC complex	Func.	YPR051W YCR020C-A YEL053C
+SWR1 complex	Func.	YAL011W YDR485C YLR085C YBR231C YDR334W YLR385C YLR399C YML041C YFL039C YDR190C YPL235W YJL081C YGR002C YNL107W
+transcription factor TFIIE complex	Func.	YKL028W YKR062W
+mRNA capping enzyme complex	Func.	YPL228W YGL130W
+Set3C	Func.	YBR103W YDR155C YIL112W YKR029C YGL194C YOL068C YCR033W
+ESCRT II complex	Func.	YJR102C YLR417W YPL002C
+MutSalpha complex	Func.	YOL090W YDR097C
+Cdc73-Paf1 complex	Func.	YBR279W YGL244W YOR123C YOL145C YLR418C
+mitochondrial small ribosomal subunit	Func.	YER050C YNR037C YBR251W YGR215W YBR146W YPL118W YMR158W YDR036C YGR084C YDL045W-A YHR059W YDR041W YGL129C YPL013C YKL155C YIL093C YNL137C YDR337W YJR101W YJR113C YBL090W YMR188C YNL081C YDR175C YOR158W YHL004W YDR347W YNR036C YNL306W YGR165W YKL003C
+AP-1 adaptor complex	Func.	YFL034W YHL019C YKL135C YLR170C YPR029C YPL259C
+U4-U6 x U5 tri-snRNP complex	Func.	YGR074W YER029C YLR147C YLR275W YER172C YKL173W YHR165C YDL098C YGR091W YDR473C YOR308C YBR055C YPR178W YPR082C
+GET complex	Func.	YDL100C YER083C YGL020C
+NatB complex	Func.	YOL076W YPR131C
+heterotrimeric G-protein complex	Func.	YHR005C YOR212W
+ribonuclease MRP complex	Func.	YBL018C YAL033W YBR167C YBR257W YGR030C YNL221C YNL282W YDR478W YHR062C
+DASH complex	Func.	YDR201W YDR016C YKL052C YGR113W YGL061C YKR083C YKR037C YKL138C-A YBR233W-A
+COPI vesicle coat	Func.	YER122C YGL137W YDL145C YDR238C YNL287W YFR051C YIL076W YPL010W
+GID complex	Func.	YCL039W YDL176W YDR255C YBR105C YGL227W YIL097W YIL017C YMR135C
+alpha-glucosidase II complex	Func.	YBR229C YDR221W
+Golgi transport complex	Func.	YNL041C YPR105C YGL005C YGL223C YER157W YNL051W YGR120C YML071C
+mitochondrial processing peptidase complex	Func.	YHR024C YLR163C
+carbamoyl-phosphate synthase complex	Func.	YJR109C YOR303W
+mitochondrial pyruvate dehydrogenase complex	Func.	YBR221C YER178W YNL071W YGR193C
+Srb-mediator complex	Func.	YBL093C YDL005C YGL127C YCR081W YGR104C YDR308C YER022W YGL025C YOL051W YPR168W YMR112C YDR443C YBR253W YOL135C YLR071C YPL042C YHR041C YHR058C YBR193C YOR174W YPR070W YNR010W YGL151W YNL236W
+CCR4-NOT complex	Func.	YGR134W YCR093W YAL021C YNL288W YNR052C YER068W
+ubiquitin conjugating enzyme complex	Func.	YGL087C YMR140W YDR092W
+MBF transcription complex	Func.	YDL056W YLR182W
+mitochondrial respiratory chain complex II	Func.	YKL148C YLL041C
+snf1 protein kinase complex	Func.	YDR028C YDR422C YER027C YER129W YDR477W YGL115W YGL208W
+m-AAA complex	Func.	YER017C YMR089C
+ESCRT-0 complex	Func.	YHL002W YNR006W
+TREX complex	Func.	YDR381W YDL084W YDR138W YHR167W YML062C YNL139C YNL253W YNL004W
+alpha DNA polymerase:primase complex	Func.	YBL035C YNL102W YIR008C YKL045W
+NatA complex	Func.	YDL040C YHR013C YOR253W
+signal recognition particle	Func.	YDL051W YKL122C YML105C YPR088C YDL092W YPL210C YPL243W
+NEF4 complex	Func.	YJR052W YPL046C
+CCAAT-binding factor complex	Func.	YBL021C YGL237C YOR358W
+vacuolar proton-transporting V-type ATPase, V1 domain	Func.	YJR033C YDL185W YBR127C YGR020C YHR039C-A YEL051W YPR036W YOR332W YKL080W
+PAN complex	Func.	YGL094C YKL025C
+cytosolic small ribosomal subunit	Func.	YDR025W YER102W YBR048W YBR189W YBL072C YDR064W YOR096W YJR145C YHR203C YJL190C YIL069C YLR367W YML024W YPL081W YOR204W
+gamma-tubulin small complex, spindle pole body	Func.	YAL047C YHR172W YNL126W YLR212C
+Elg1 RFC-like complex	Func.	YBR087W YOL094C YNL290W YJR068W YOR217W YOR144C
+tRNA-intron endonuclease complex	Func.	YLR105C YPL083C
+ISW1 complex	Func.	YBR245C YKR001C YPL082C YLR095C YMR044W
+EKC-KEOPS protein complex	Func.	YGR262C YJL184W YKR038C YML036W
+FACT complex	Func.	YGL207W YML069W
+HOPS complex	Func.	YMR231W YAL002W YLR396C YLR148W YDR080W YDL077C YPL045W
+MutSBeta complex	Func.	YOL090W YCR092C
+cytochome c oxidase complex, subunits IV, Va, VI and VIIa	Func.	YNL052W YGL187C YDL067C YHR051W
+SCF ubiquitin ligase complex	Func.	YDL132W YDR054C YJL047C YGL252C YOL133W
+nucleotide-excision repair factor 1 complex	Func.	YAL027W YML095C YPL022W
+carboxy-terminal domain protein kinase complex	Func.	YKL139W YJL006C YML112W
+eukaryotic translation elongation factor 1 complex	Func.	YAL003W YPL048W YKL081W YPR080W
+NuA4 histone acetyltransferase complex	Func.	YDR359C YEL018W YFL024C YOR244W YJR082C YHR090C YNL136W YPR023C YJL081C YGR002C YNL107W YFL039C
+RNA polymerase I complex	Func.	YNL113W YPR110C YHR143W-A YBR154C YPR187W YOR224C YOR210W YDR156W YJL148W YJR063W YNL248C YOR340C YOR341W YPR010C
+90S preribosome	Func.	YBR247C YDR324C YPL126W YOR310C YGR145W YLR222C YNL075W YJL109C YDR398W YCR057C YPR144C YLR409C YNL132W YLL011W YDL148C YOR145C YBL004W YLR186W YCL059C YJR145C YDR449C YPR112C YMR128W YJR002W YDR299W YOR096W YPL217C YLR197W YOR078W YDL014W YPR137W YMR093W YOL010W YPL266W YLR003C YJL069C YGR128C YLR129W YGR090W YPL012W YER127W YKR060W YER082C YEL055C YDR064W YHR196W YGL171W YHR148W
+RSC complex	Func.	YMR091C YGL013C YNR023W YHR056C YLR357W YML127W YDR303C YDR225W YOR156C YGR056W YFR037C YOR290C YIL126W YHL025W YJL176C YMR033W YDR073W YCR020W-B YPR034W YCR052W YBR289W YLR321C YLR033W YGR275W YFL049W YPL016W YKR008W
+CAAX-protein geranylgeranyltransferase complex	Func.	YKL019W YGL155W
+Arp2-3 protein complex	Func.	YDL029W YBR234C YIL062C YNR035C YKL013C YLR370C YJR065C
+SAGA complex	Func.	YBR198C YDR167W YDR145W YMR236W YDR448W YGR252W YGL112C YDR392W YCL010C YOL148C YBR081C YDR176W YGL066W YPL254W YLR055C YMR223W YPL047W YHR099W
+TRAPP complex	Func.	YGR166W YKR068C YOR115C YDR108W YDR246W YML077W YDR407C YBR254C YDR472W YMR218C
+AP-2 adaptor complex	Func.	YBL037W YJR058C YJR005W YOL062C
+CAF-1 complex	Func.	YBR195C YML102W YPR018W
+GARP complex	Func.	YDR484W YDR027C YJL029C YJL034W YKR020W
+CCR4-NOT Not2-Not5 subcomplex	Func.	YDL165W YPR072W
+origin recognition complex	Func.	YBR060C YML065W YLL004W YPR162C YHR118C YNL261W
+Smc5-Smc6 complex	Func.	YEL019C YDR288W YOL034W YDL105W
+RNA polymerase III complex	Func.	YDR045C YDL150W YJL011C YKL144C YKR025W YNL151C YPR190C YNR003C YOR207C YOR116C YNL113W YPR110C YBR154C YPR187W YOR224C YOR210W
+proteasome regulatory particle	Func.	YDL147W YHL030W YDR363W-A YFR010W YGR232W YDR394W YER021W YDR427W YDL007W YHR200W YFR004W YFR052W YOR259C YOR261C YDL097C YGL048C YLR421C YHR027C YOR117W YPR108W YIL075C YKL145W
+Ski complex	Func.	YGL213C YLR398C YKL023W YPR189W
+eukaryotic translation initiation factor 2B complex	Func.	YDR211W YLR215C YOR260W YLR291C YGR083C YJR007W YER025W YKR026C YPL237W
+exomer complex	Func.	YLR330W YJL099W YKR027W YOR299W YMR237W
+INO80 complex	Func.	YFL039C YER092W YGL150C YDL002C YFL013C YOR141C YLR052W YNL059C YNL215W YDR190C YPL235W YJL081C
+MIND complex	Func.	YAL034W-A YPL233W YIR010W YJR112W
+Elongator holoenzyme complex	Func.	YLR384C YGR200C YPL086C YHR187W YPL101W YMR312W
+retromer complex	Func.	YHR012W YJL154C YJL053W YOR069W YOR132W YPL070W
+anaphase-promoting complex	Func.	YDR260C YFR036W YIR025W YGL240W YBL084C YDR118W YOR249C YHR166C YKL022C YLR127C YNL172W YLR102C
+proteasome core complex	Func.	YFL007W YER012W YGL011C YBL041W YOL038W YFR050C YGR135W YER094C YJL001W YOR362C YPR103W YGR253C YML092C YOR157C YMR314W
+alpha-1,6-mannosyltransferase complex	Func.	YDR245W YEL036C YJL183W YPL050C YJR075W
+ESCRT I complex	Func.	YCL008C YLR119W YGR206W YPL065W
+cAMP-dependent protein kinase complex	Func.	YKL166C YIL033C YJL164C YPL203W
+translation release factor complex	Func.	YBR143C YDR172W
+Ku70:Ku80 complex	Func.	YMR106C YMR284W
+transcription factor TFIIIC complex	Func.	YGR047C YAL001C YDR362C YBR123C YOR110W YPL007C
+fatty acid synthase complex	Func.	YKL182W YPL231W
+RENT complex	Func.	YDL042C YJL076W
+septin complex	Func.	YJR092W YJR076C YCR002C YHR107C YDL225W YLR314C
+exocyst	Func.	YPR055W YER008C YJL085W YIL068C YDR166C YLR166C YBR102C YGL233W
+signalosome	Func.	YDR179C YDL216C YOL117W YIL071C YMR025W
+preribosome, large subunit precursor	Func.	YLL008W YER006W YPL211W YBR142W YNL061W YNL110C YOL077C YDR496C YHR052W YMR290C YKR081C YLL034C YOR272W YKL172W YPR016C YDR087C YGL111W YHR088W YLR002C YFL002C YKL009W YCL054W YDL031W YPL093W YOR206W YLR449W YMR049C YNL002C YMR229C YGR103W
+nucleotide-excision repair factor 2 complex	Func.	YEL037C YER162C
+calcineurin complex	Func.	YKL190W YML057W
+mitochondrial isocitrate dehydrogenase complex (NAD+)	Func.	YOR136W YNL037C
+Mre11 complex	Func.	YDR369C YMR224C YNL250W
+Rab-protein geranylgeranyltransferase complex	Func.	YJL031C YPR176C
+signal recognition particle receptor complex	Func.	YDR292C YKL154W
+endoplasmic reticulum Sec complex	Func.	YBR171W YLR292C YOR254C YPL094C
+eukaryotic translation initiation factor 3 complex	Func.	YAL035W YDR091C YBR079C YMR309C YLR192C YDR429C YMR146C YPR041W YOR361C YNL244C
+HIR complex	Func.	YBL008W YOR038C YBR215W YJR140C
+MutLalpha complex	Func.	YMR167W YNL082W
+RNA polymerase II complex	Func.	YGL043W YDL115C YDL140C YGL070C YGR005C YGR186W YIL021W YDR404C YOL005C YJL140W YOR151C YGR063C YML010W YPL129W YBR154C YPR187W YOR224C YOR210W
+chaperonin-containing T-complex	Func.	YJL014W YDL143W YDR188W YIL142W YJL111W YOR281C YNL212W YJL008C YJR064W
+transcription factor TFIID complex	Func.	YBR198C YDR167W YDR145W YMR236W YGL112C YGR274C YMR227C YML015C YPL011C YMR005W YML098W
+nascent polypeptide-associated complex	Func.	YHR193C YPL037C YDR252W
+cytosolic large ribosomal subunit	Func.	YBL092W YGL014W YBR191W YHR141C YLR287C-A YFR032C-A YGR118W YNL302C YNL096C YGL031C YDR418W YGL123W YDR382W YDL083C YCR031C YDR447C YER074W YBL027W YDL136W YHL001W YJL177W YGR034W YMR194W YKL180W YBR181C YOL040C YHL033C YFR031C-A YNL069C YML073C YLR448W YNL301C YLR075W YML063W YLR441C YJR123W YNL178W YPL090C YLR150W YGL147C YBR031W YGL030W YDL075W YGL103W YDL082W YDR471W YMR242C YOL127W YGL135W YGR085C YIL133C YLR029C YDR012W YOR312C YGL076C YLL045C YOR063W YPL198W YPL249C-A YLR340W YIL018W YPL220W YMR142C YOL039W
+RAVE complex	Func.	YDR202C YJR033C YDR328C
+prefoldin complex	Func.	YJL179W YEL003W YGR078C YNL153C YML094W YLR200W
+eukaryotic translation initiation factor 4F complex	Func.	YER165W YGL049C YGR162W YOL139C
+core TFIIH complex	Func.	YDR311W YLR005W YPR056W
+phenylalanine-tRNA ligase complex	Func.	YLR060W YFL022C
+DNA replication factor A complex	Func.	YAR007C YNL312W YJL173C YHR164C
+alpha,alpha-trehalose-phosphate synthase complex (UDP-forming)	Func.	YBR126C YDR074W YMR261C YML100W
+GPI-anchor transamidase complex	Func.	YDR331W YHR188C YLR088W YDR434W
+ribonucleoside-diphosphate reductase complex	Func.	YGR180C YJL026W YOR230W
+exosome (RNase complex)	Func.	YHR081W YCR035C YGR195W YDL111C YDR280W YOR076C YGR158C YHR069C YGR095C YOL142W YNL232W YOL021C YOR001W YNR024W YNL189W
+COMPASS complex	Func.	YBR175W YBR258C YDR469W YHR119W YAR003W YLR015W YPL138C YKL018W
+SBF transcription complex	Func.	YER111C YLR182W
+protein farnesyltransferase complex	Func.	YDL090C YKL019W
+nuclear condensin complex	Func.	YFR031C YDR325W YLR272C YLR086W YBL097W
+snRNP U6	Func.	YER146W YDL160C YER112W YCR077C YJL124C YBL026W YDR378C YNL147W YJR022W YMR268C YLR438C-A
+subunit VII of the cytochrome bc1 complex	Func.	YDL189W YDR529C YBL045C YPR191W
+putatie Saf1-Aah1 complex	Func.	YNL141W YBR280C
+putative Tkl2-Tkl1 isozyme complex	Func.	YBR117C YPR074C
+putative Trm7-Ymr259c complex	Func.	YBR061C YMR259C
+putative Atg18-Atg2 complex	Func.	YFR021W YNL242W
+putative Trm7-Rtt10 complex	Func.	YBR061C YPL183C
+putative Nuc1-Trz1-Ymr099c complex	Func.	YJL208C YKR079C YMR099C
+putative Sas5-Wtm2 complex	Func.	YOR213C YOR229W
+putative Cdc47-Erg26 complex	Func.	YBR202W YGL001C
+putative Flc2-Tcb3 complex	Func.	YAL053W YML072C
+putative Rpl23a-Rpl23b-Bcp1-Rkm1 complex	Func.	YBL087C YER117W YDR361C YPL208W
+putative Rsa3-Urb1-Urb2-Nop8 complex	Func.	YLR221C YKL014C YJR041C YOL144W
+putative Ybr225w-Mds3-Cdc25 complex	Func.	YBR225W YGL197W YLR310C
+putative Tom71-Ylr072w complex	Func.	YHR117W YLR072W
+putative Flc2-Pdr5 complex	Func.	YAL053W YOR153W
+putative Ecm30-Ubp15 complex	Func.	YLR436C YMR304W
+putative Cox20-Chs1 complex	Func.	YDR231C YNL192W
+putative Hca4-Esf1-Esf2 complex	Func.	YJL033W YDR365C YNR054C
+putative Hsp42-Gln1 complex	Func.	YDR171W YPR035W
+putative Bud6-Yor304c-a complex	Func.	YLR319C YOR304C-A
+putative Skp1-Ypt52-Ymr258c complex	Func.	YDR328C YKR014C YMR258C
+putative Bat1-Bat2 complex	Func.	YHR208W YJR148W
+putative Nfs1-Isd11 complex	Func.	YCL017C YER048W-A
+putative Ser3-Ser33 isozyme complex	Func.	YER081W YIL074C
+putative Slx5-Swa2 complex	Func.	YDL013W YDR320C
+putative Yjl070c-Amd1 complex	Func.	YJL070C YML035C
+putative Yer071c-Aim21-Cap1-Cap2 complex	Func.	YER071C YIR003W YIL034C YKL007W
+putative Mob1-Dbf20 complex	Func.	YIL106W YPR111W
+putative Psy2-Rrd1 complex	Func.	YNL201C YIL153W
+putative Nvj1-Tos4 complex	Func.	YHR195W YLR183C
+putative Ark1-Ste4 complex	Func.	YDR264C YOR212W
+putative Sla2-Lsb3 complex	Func.	YNL243W YFR024C-A
+putative Cyc3-Yat1 complex	Func.	YAL039C YAR035W
+putative Uba1-Ydr415c complex	Func.	YKL210W YDR415C
+putative Las17-Sla1-Vrp1 complex	Func.	YLR337C YBL007C YOR181W
+putative Ela1-Tys1 complex	Func.	YNL230C YGR185C
+putative Dre2-Tah18 complex	Func.	YKR071C YPR048W
+putative Kex2-Sil1 complex	Func.	YNL238W YOL031C
+putative Ssl2-Yor352w complex	Func.	YIL143C YOR352W
+putative Tdh3-Pgk1-Eno2-Fba1-Pgm1 complex	Func.	YGR192C YCR012W YHR174W YKL060C YKL152C
+putative Cin8-Zwf1 complex	Func.	YEL061C YNL241C
+putative Pcm1-Mgs1 complex	Func.	YEL058W YNL218W
+putative Yef1-Utr1 complex	Func.	YEL041W YJR049C
+putative Ost1-Stt3 complex	Func.	YJL002C YGL022W
+putative Osh2-Swh1 complex	Func.	YDL019C YAR042W
+putative Sit4-Sap185-Rts3-Hrk1 complex	Func.	YDL047W YJL098W YGR161C YOR267C
+putative Grh1-Fmp38 complex	Func.	YDR517W YOR205C
+putative Tif1-Tif2 complex	Func.	YKR059W YJL138C
+putative Sah1-Caf16 complex	Func.	YER043C YFL028C
+putative Bre1-Lge1 complex	Func.	YDL074C YPL055C
+putative Fmc1-Atp12 complex	Func.	YIL098C YJL180C
+putative Fpr3-Ssb2 complex	Func.	YML074C YNL209W
+putative Ptc7-Sec14 complex	Func.	YHR076W YMR079W
+putative Faa4-Ygl082w complex	Func.	YGL082W YMR246W
+putative Ykl088w-Ppz1 complex	Func.	YKL088W YML016C
+putative Hmt1-Scd6-Psp2 complex	Func.	YBR034C YPR129W YML017W
+putative Eft1-Eft2 complex	Func.	YOR133W YDR385W
+putative Mnl1-Pdi1 complex	Func.	YHR204W YCL043C
+putative Nnf2-Yel043w complex	Func.	YEL043W YGR089W
+putative Yae1-Ynl260c complex	Func.	YJR067C YNL260C
+putative Erv46-Erv41-Ero1 complex	Func.	YAL042W YML067C YML130C
+putative Sok1-Rtn1-Crp1-Ids2-Pep4 complex	Func.	YDR006C YDR233C YHR146W YJL146W YPL154C
+putative Vac8-Nce102 complex	Func.	YEL013W YPR149W
+putative Tma20-Tma22 complex	Func.	YER007C-A YJR014W
+putative Wbp1-Swp1 complex	Func.	YEL002C YMR149W
+putative Ubc4-Ufd4 complex	Func.	YBR082C YKL010C
+putative Sfp1-Mrs6 complex	Func.	YLR403W YOR370C
+putative Trm3-Fas1 complex	Func.	YDL112W YKL182W
+putative Ste23-Mrn1 complex	Func.	YLR389C YPL184C
+putative Drn1-Dbr1 complex	Func.	YGR093W YKL149C
+putative Yak1-Ypl247c complex	Func.	YJL141C YPL247C
+putative Fap1-Fpr1-Yil161w complex	Func.	YNL135C YNL023C YIL161W
+putative Crn1-Inp52-Bsp1 complex	Func.	YLR429W YNL106C YPR171W
+putative Uga1-Ndt80 complex	Func.	YGR019W YHR124W
+putative Ptc6-Pro2 complex	Func.	YCR079W YOR323C
+putative Tub3-Gcn1-Gcn20-Gfa1-Mae1-Sam1-Clu1 complex	Func.	YML124C YGL195W YFR009W YKL104C YKL029C YLR180W YMR012W
+putative Pex5-Mmt1 complex	Func.	YDR244W YMR177W
+putative Pcl8-Pho85 CDK-cyclin complex	Func.	YPL031C YPL219W
+putative Mba1-Ste50 complex	Func.	YBR185C YCL032W
+putative Ura5-Ura10 isozyme complex	Func.	YML106W YMR271C
+putative Pmr1-Psd1 complex	Func.	YGL167C YNL169C
+putative Kem1-Gbp2-Sro9-Sbp1 complex	Func.	YGL173C YCL011C YCL037C YHL034C
+putative Ipp1-Tus1-Ypl066w complex	Func.	YBR011C YLR425W YPL066W
+putative Ede1-Syp1 complex	Func.	YBL047C YCR030C
+putative Pex14-Pex17 complex	Func.	YGL153W YNL214W
+putative Sum1-Rfm1 complex	Func.	YDR310C YOR279C
+putative Ptc4-Ydr186c complex	Func.	YBR125C YDR186C
+putative Ybr137w-Sgt2-Mdy2-Yor164c complex	Func.	YBR137W YOR007C YOL111C YOR164C
+putative Ygr071c-Vid22-Tbf1 complex	Func.	YGR071C YLR373C YPL128C
+putative Yhb1-Aco1 complex	Func.	YGR234W YLR304C
+putative Yjr136c-Ykl033w complex	Func.	YJR136C YKL033W
+putative Lys20-Lys21 isozyme complex	Func.	YDL131W YDL182W
+putative Nth1-Bmh1-Bmh2 complex	Func.	YDR001C YDR099W YER177W
+putative Met13-Yml082w complex	Func.	YGL125W YML082W
+putative Pyc1-Pyc2 isozyme complex	Func.	YGL062W YBR218C
+putative Gir2-Rbg2 complex	Func.	YDR152W YGR173W
+putative Yhr131c-Rsp5 complex	Func.	YHR131C YER125W
+putative Ptc3-Paa1 complex	Func.	YBL056W YDR071C
+putative Aro3-Bcs1 complex	Func.	YDR035W YDR375C
+putative Yor251c-Rev1 complex	Func.	YOR251C YOR346W
+putative Cmd1-Mlc1-Myo2-Myo1-Mlc2 complex	Func.	YBR109C YGL106W YOR326W YHR023W YPR188C
+putative Efg1-Bud22 complex	Func.	YMR014W YGR271C-A
+putative Hsp42-Sis1 complex	Func.	YDR171W YNL007C
+putative Ygr017w-Vip1 complex	Func.	YGR017W YLR410W
+putative Ygr130c-Ymr031c complex	Func.	YGR130C YMR031C
+putative Put1-Ymr315w complex	Func.	YLR142W YMR315W
+putative Crm1-Mir1-Erd2-Tub1-Gea2-Mtr10-Kap104 complex	Func.	YGR218W YJR077C YBL040C YML085C YEL022W YOR160W YBR017C
+putative Kap95-Nup1 nuclear pore subcomplex	Func.	YLR347C YOR098C
+putative Emp24-Erv25-Erp3-Erp5 complex	Func.	YGL200C YML012W YDL018C YHR110W
+putative Gdh1-Gdh3 isozyme complex	Func.	YOR375C YAL062W
+putative Sas3-Nto1-Ylr455w complex	Func.	YBL052C YPR031W YLR455W
+putative Cwc2-Spp382-Ntr2 complex	Func.	YDL209C YLR424W YKR022C
+putative Heh2-Erg24 complex	Func.	YDR458C YNL280C
+putative Sgn1-Ygr250c complex	Func.	YGR250C YIR001C
+putative Oca6-Oca5-Oca4-Oca3-Oca1-Oca2 complex	Func.	YDR067C YHL029C YCR095C YNL032W YNL099C YNL056W
+putative Yll032c-Yml119w complex	Func.	YLL032C YML119W
+putative Map1-Ybr030w complex	Func.	YBR030W YLR244C
+putative core TFIIH Tfb5-Tfb2 subcomplex	Func.	YDR079C-A YPL122C
+putative Gsy1-Gsy2 complex	Func.	YLR258W YFR015C
+putative Ycp4-Rfs1-Pst2 complex	Func.	YCR004C YBR052C YDR032C
+putative Dhr2-Ubp10 complex	Func.	YKL078W YNL186W
+putative Ats1-Kti11 complex	Func.	YAL020C YBL071W-A
+putative Yer140w-Slp1 complex	Func.	YER140W YOR154W
+putative Ipp1-Ack1-Rom2 complex	Func.	YBR011C YDL203C YLR371W
+putative Ypk1-Ypk2 complex	Func.	YKL126W YMR104C
+putative Tao3-Yml081w complex	Func.	YIL129C YML081W
+putative Hrr25-Ltv1-Rio2-Tsr1 complex	Func.	YKL143W YDL060W YPL204W YNL207W
+putative Arx1-Rsa4-Sda1-Ipi3-Nsa2-Nog2-Bud20-Ipi1-Mdn1 complex	Func.	YDR101C YCR072C YGR245C YNL182C YER126C YNR053C YLR074C YHR085W YLR106C
+putative Hog1-Rck2 complex	Func.	YLR113W YLR248W
+putative Nup170-Nup53-Hms1 complex	Func.	YBL079W YMR153W YOR032C
+putative Ade16-Ade17-Sol2 complex	Func.	YMR120C YCR073W-A YLR028C
+putative Rgd1-Fyv8 complex	Func.	YBR260C YGR196C
+putative Pet112-Ymr293c complex	Func.	YBL080C YMR293C
+putative Cul3-Yil001w complex	Func.	YGR003W YIL001W
+putative Paa1-Ptc2 complex	Func.	YDR071C YER089C
+putative Ypt1-Dss4 complex	Func.	YFL038C YPR017C
+putative Nma2-Nma1 complex	Func.	YGR010W YLR328W
+putative Cia1-Yhr122w-Met18-Nar1 complex	Func.	YDR267C YHR122W YIL128W YNL240C
+putative Ddi1-Pmt4 complex	Func.	YER143W YJR143C
+putative Ygr283c-Idp3 complex	Func.	YGR283C YNL009W
+putative Abp1-Crn1 complex	Func.	YCR088W YLR429W
+putative Met13-Met12 isozyme complex	Func.	YGL125W YPL023C
+putative Boi2-Cdc24 complex	Func.	YAL041W YER114C
+putative Fun19-Kap123 complex	Func.	YAL034C YER110C
+putative Ygr283c-Ymr310c complex	Func.	YGR283C YMR310C
+putative Trr1-Trr2 complex	Func.	YDR353W YHR106W
+putative Fbp26-Ylr345w complex	Func.	YJL155C YLR345W
+putative Pck1-Eno1 complex	Func.	YBL105C YGR254W
+putative Tdh1-Tdh2 isozyme complex	Func.	YJL052W YJR009C
+putative Gdi1-Ypt6-Ypt1 complex	Func.	YER136W YLR262C YFL038C
+putative Bdh1-Bdh2 complex	Func.	YAL060W YAL061W
+putative Rps0a-Rps0b complex	Func.	YGR214W YLR048W
+putative Ubp13-Yol087c complex	Func.	YBL067C YOL087C
+putative Pol4-Rpn5 complex	Func.	YCR014C YDL147W
+putative Erg7-Erg27 complex	Func.	YHR072W YLR100W
+putative Rrp7-Ifh1 complex	Func.	YCL031C YLR223C
+putative Asn1-Asn2 isozyme complex	Func.	YGR124W YPR145W
+putative Mdm10-Mpm1-Tom40-Yhm2 complex	Func.	YAL010C YJL066C YMR203W YMR241W
+putative Ybt1-Dak1 complex	Func.	YLL048C YML070W
+putative Cdc19-Pyk2 isozyme complex	Func.	YAL038W YOR347C
+putative Pkh1-Mrp8-Pil1-Lsp1 complex	Func.	YDR490C YKL142W YGR086C YPL004C
+putative Lsg1-Nmd3-Rei1 complex	Func.	YGL099W YBR267W YHR170W
+putative Taf8-Taf14-Taf2 TFIID subcomplex	Func.	YML114C YPL129W YCR042C
+putative Ssd1-Psy4-Pph3-Psy2 complex	Func.	YDR293C YBL046W YDR075W YNL201C
+putative Rim1-Rad52 complex	Func.	YCR028C-A YML032C
+putative Nqm1-Tal1 complex	Func.	YGR043C YLR354C
+putative Vab2-Ydr357c-Ykl061w-YGL079w-Ynl086w complex	Func.	YDR357C YKL061W YEL005C YGL079W YNL086W
+putative Kap123-Ypr174c complex	Func.	YER110C YPR174C
+putative Spe3-Spe4 complex	Func.	YLR146C YPR069C
+putative Leu4-Leu9 isozyme complex	Func.	YNL104C YOR108W
+putative Snf7-Vps4 complex	Func.	YLR025W YPR173C
+putative Hmg1-Hmg2 isozyme complex	Func.	YLR450W YML075C
+putative Oye2-Oye3 complex	Func.	YHR179W YPL171C
+putative Glt1-Ylr257w complex	Func.	YDL171C YLR257W
+spliceosome	Func.	YGL120C YBR065C YJR050W YAL032C YDR364C YGR278W YCR063W YMR213W YDL209C YDR416W YLL036C YLR117C YPL151C YPR101W YGL128C YLR424W
+1,3-beta-glucan synthase complex (GO)	Func.	YGR032W YLR342W YPR165W
+6-phosphofructokinase complex (GO)	Func.	YGR240C YMR205C
+90S preribosome (GO)	Func.	YCR057C YGR081C YGR103W YJL010C snR17a snR17b
+acetolactate synthase complex (GO)	Func.	YCL009C YMR108W
+box C/D snoRNP complex (GO)	Func.	YDL014W YEL026W YLR197W YOR310C snR128 snR13 snR17a snR17b snR18 snR190 snR24 snR38 snR39 snR39B snR4 snR40 snR41 snR47 snR48 snR50 snR51 snR52 snR53 snR54 snR55 snR56 snR57 snR58 snR59 snR60 snR61 snR62 snR63 snR64 snR65 snR66 snR67 snR68 snR69 snR70 snR71 snR72 snR73 snR74 snR75 snR76 snR77 snR78 snR79 snR87
+box H/ACA snoRNP complex (GO)	Func.	YHR089C YLR175W snR10 snR11 snR161 snR189 snR191 snR3 snR30 snR31 snR32 snR33 snR34 snR35 snR36 snR37 snR42 snR43 snR44 snR46 snR49 snR5 snR8 snR80 snR81 snR82 snR83 snR84 snR85 snR86 snR9
+calcineurin complex (GO)	Func.	YKL159C YKL190W YLR433C YML057W
+CBF3 complex (GO)	Func.	YDR328C YGR140W YMR094W YMR168C
+CCR4-NOT complex (GO)	Func.	YFL028C YGR134W YKR036C YNL278W YNL288W
+chromatin accessibility complex (GO)	Func.	YDR121W YGL133W YJL065C YOR304W
+chromatin assembly complex (GO)	Func.	YER030W YJL115W YOL012C
+chromatin silencing complex (GO)	Func.	YBR195C YDR227W YKR101W YLR442C
+cohesin loading complex (GO)	Func.	YDR180W YER147C
+commitment complex (GO)	Func.	YDR240C YGR074W YHR086W YIL061C YKL074C YLR116W YLR147C YLR298C YML046W YMR125W YPL178W snR19
+Cul3-RING ubiquitin ligase complex (GO)	Func.	YBR114W YGR003W YJR052W YNL230C YPL046C
+CURI complex (GO)	Func.	YCL031C YGR090W YLR223C YOR039W YPR104C
+cyclin-dependent protein kinase holoenzyme complex (GO)	Func.	YBR135W YBR160W YDL127W YDL179W YER059W YGL134W YGL215W YHR071W YIL050W YNL289W YOL001W YPL219W YPL256C
+cytoplasmic dynein complex (GO)	Func.	YDR424C YDR488C YKR054C YMR299C
+Dbf4-dependent protein kinase complex (GO)	Func.	YDL017W YDR052C
+DNA ligase IV complex (GO)	Func.	YGL090W YLR265C YOR005C
+DNA-directed RNA polymerase II, holoenzyme (GO)	Func.	YBR236C YDL115C YGR097W
+DSIF complex (GO)	Func.	YGR063C YML010W
+dynactin complex (GO)	Func.	YDR106W YHR129C YMR294W YPL174C
+ESCRT III complex (GO)	Func.	YKL002W YKL041W YLR025W YMR077C
+exosome (RNase complex) (GO)	Func.	YOR076C
+F-actin capping protein complex (GO)	Func.	YIL034C YKL007W
+glutamate synthase complex (GO)	Func.	YDL171C
+glycine cleavage complex (GO)	Func.	YAL044C YDR019C YFL018C YMR189W
+glycosylphosphatidylinositol-N-acetylglucosaminyltransferase (GPI-GnT) complex (GO)	Func.	YDR437W YGR216C YNL038W YPL076W YPL096C-A YPL175W
+heterogeneous nuclear ribonucleoprotein complex (GO)	Func.	YNL004W YNL016W
+heterotrimeric G-protein complex (GO)	Func.	YHR005C YJR086W YOR212W
+high affinity iron permease complex (GO)	Func.	YER145C YMR058W
+Holliday junction resolvase complex (GO)	Func.	YBR098W YDR386W
+i-AAA complex (GO)	Func.	YCL044C YPR024W
+kinesin complex (GO)	Func.	YBL063W YEL061C YGL216W YMR198W YPL155C YPL253C
+mannosyltransferase complex (GO)	Func.	YBR004C YNL158W
+MCM complex (GO)	Func.	YBL023C YBR202W YEL032W YGL201C YLR274W YPR019W
+Mdm10/Mdm12/Mmm1 complex (GO)	Func.	YAL010C YLL006W YOL009C
+mitochondrial inner membrane peptidase complex (GO)	Func.	YEL059C-A YMR035W YMR150C
+mitochondrial inner membrane presequence translocase complex (GO)	Func.	YGR033C YJL104W YJL143W YLR008C YNR017W YPL063W
+mitochondrial inner membrane protein insertion complex (GO)	Func.	YBR091C YDL217C YJL054W YOR297C
+mitochondrial intermembrane space protein transporter complex (GO)	Func.	YEL020W-A YGR181W YHR005C-A YJR135W-A
+mitochondrial outer membrane translocase complex (GO)	Func.	YGR082W YKL195W YMR203W YNL070W YNL121C YNL131W YOR045W YPR133W-A
+mitochondrial proton-transporting ATP synthase complex (GO)	Func.	YDL130W-A YDL181W YGR008C
+mitochondrial proton-transporting ATP synthase complex, coupling factor F(o) (GO)	Func.	Q0080 Q0085 Q0130 YDR322C-A YDR377W YLR295C YML081C-A YOL077W-A YPR020W
+mitochondrial respiratory chain complex II (GO)	Func.	YDR178W YKL141W YKL148C YLL041C
+mitochondrial ribonuclease P complex (GO)	Func.	YML091C
+mitochondrial ribosome (GO)	Func.	YDL069C YGL068W YKL142W YPL132W
+mitochondrial sorting and assembly machinery complex (GO)	Func.	YAL010C YHR083W YMR060C YNL026W
+mitotic checkpoint complex (GO)	Func.	YGL116W YJL013C YJL030W YOR026W
+monopolin complex (GO)	Func.	YCR086W YDR439W YER106W YPL204W
+Mre11 complex (GO)	Func.	YDR369C YMR224C YNL250W
+mRNA cap complex (GO)	Func.	YJL124C YKL204W YOR276W
+MutLbeta complex (GO)	Func.	YMR167W YPL164C
+myosin II complex (GO)	Func.	YHR023W
+myosin V complex (GO)	Func.	YAL029C YOR326W
+Noc1p-Noc2p complex (GO)	Func.	YDR060W YOR206W
+Noc2p-Noc3p complex (GO)	Func.	YLR002C YOR206W
+Noc4p-Nop14p complex (GO)	Func.	YDL148C YPR144C
+NuA3 histone acetyltransferase complex (GO)	Func.	YBL052C YJR082C YOR064C YPL129W YPR031W
+nuclear cap binding complex (GO)	Func.	YMR125W YPL178W
+nuclear RNA export factor complex (GO)	Func.	YKL186C YPL169C
+nuclear SCF ubiquitin ligase complex (GO)	Func.	YFL009W YIL046W
+nuclear telomere cap complex (GO)	Func.	YBR275C YDL042C YDL220C YDR082W YDR227W YGR099W YLR010C YLR150W YLR442C YLR453C YNL216W
+nucleolar preribosome, large subunit precursor (GO)	Func.	YER126C YGR103W YLR022C YLR221C YNR038W YPL093W
+nucleolar preribosome, small subunit precursor (GO)	Func.	YBR247C YGR081C YJL010C YKL143W YNL178W
+nucleotide-excision repair factor 1 complex (GO)	Func.	YML095C YMR201C YPL022W
+nucleotide-excision repair factor 3 complex (GO)	Func.	YDR460W YGR258C
+nucleotide-excision repair factor 4 complex (GO)	Func.	YBR114W YJR052W YKL112W YPL046C
+oligosaccharyl transferase complex (GO)	Func.	YDL232W YEL002C YGL022W YGL226C-A YJL002C YML019W YMR149W YOR085W YOR103C
+palmitoyltransferase complex (GO)	Func.	YLR246W YOL110W
+PCNA complex (GO)	Func.	YBR088C
+phosphopyruvate hydratase complex (GO)	Func.	YGR254W YHR174W
+preribosome (GO)	Func.	YDL166C YOR056C
+proteasome complex (GO)	Func.	YBR082C YDR059C YDR069C YDR177W YEL037C YGL058W YGR184C YHL030W YHR052W
+proteasome core complex (GO)	Func.	YFL007W
+proteasome regulatory particle (GO)	Func.	YDL020C YFR010W YGR232W
+protein phosphatase type 1 complex (GO)	Func.	YBR045C YBR050C YDR028C YER054C YER133W YLR273C YOR178C
+RecQ helicase-Topo III complex (GO)	Func.	YLR234W YMR190C YPL024W
+RENT complex (GO)	Func.	YDL042C YFR028C YJL076W YPL126W
+repairosome (GO)	Func.	YBR114W YEL037C YER162C YJR052W
+retromer complex, outer shell (GO)	Func.	YOR069W YOR132W
+Rhp55-Rhp57 complex (GO)	Func.	YDR004W YDR076W
+ribonuclease H2 complex (GO)	Func.	YDR279W YLR154C YNL072W
+ribonucleoprotein complex (GO)	Func.	YIL149C YKR095W YOR198C
+ribonucleoside-diphosphate reductase complex (GO)	Func.	YER070W YGR180C YIL066C YJL026W
+RNA polymerase I transcription factor complex (GO)	Func.	YBL014C YER148W YJL025W YKL125W YML043C
+RNA polymerase I upstream activating factor complex (GO)	Func.	YBL025W YLR141W YMR270C YOR295W
+signal peptidase complex (GO)	Func.	YIR022W YJR010C-A YLR066W YML055W
+Sin3 complex (GO)	Func.	YMR053C YNL309W YOL004W
+Slx1-Slx4 complex (GO)	Func.	YBR228W YLR135W
+small nuclear ribonucleoprotein complex (GO)	Func.	YER127W YPR057W YPR137W
+SNARE complex (GO)	Func.	YAL030W YGR009C YPL232W
+sulfite reductase complex (NADPH) (GO)	Func.	YFR030W YJR137C
+synaptonemal complex (GO)	Func.	YGL249W YNL088W
+telomerase catalytic core complex (GO)	Func.	TLC1 YLR318W
+telomerase holoenzyme complex (GO)	Func.	YIL009C-A YLR233C
+TORC1 complex (GO)	Func.	YHR186C YJR066W YKL203C YNL006W YPL180W
+TORC2 complex (GO)	Func.	YER093C YIL105C YJL058C YKL203C YMR068W YNL006W YNL047C YOL078W
+transcription elongation factor complex (GO)	Func.	YER164W YGR116W YNL230C YPL046C YPR133C
+transcription factor complex (GO)	Func.	YCR081W YDR443C YNL025C YPL042C YPR186C
+transcription factor TFIIIB complex (GO)	Func.	YER148W YGR246C YNL039W
+translocon complex (GO)	Func.	YBR283C YDR086C YER019C-A YER087C-B YLR378C
+tRNA-intron endonuclease complex (GO)	Func.	YAR008W YLR105C YMR059W YPL083C
+ubiquitin conjugating enzyme complex (GO)	Func.	YDR092W YGL087C
+ubiquitin ligase complex (GO)	Func.	YDL013W YDR219C YDR306C YER116C YER125W YLR224W YML111W YMR275C YNL311C YOR057W
+UDP-N-acetylglucosamine transferase complex (GO)	Func.	YBR070C YGL047W
+vacuolar transporter chaperone complex (GO)	Func.	YER072W YFL004W YJL012C YPL019C
+zeta DNA polymerase complex (GO)	Func.	YIL139C YPL167C

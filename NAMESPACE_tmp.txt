@@ -1,0 +1,8 @@
+# Remove the previous line if you edit this file
+
+# Export all names
+#exportPattern(".")
+export(colonyzer.read,dtl,getDeadLocations,Glogist,loapproxfun,logist,makeFitness,mdp,mdr,mdrmdp,normalisePlates,pgis,qfa.epi,qfa.epiplot,qfa.fit,qfa.plot,report.epi,rod.read,rod.write)
+
+# Import all packages listed as Imports or Depends
+import(sp,DEoptim)
