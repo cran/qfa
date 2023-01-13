@@ -1,9 +1,0 @@
-Barcode	Start.Time	Treatment	Medium	Screen	Library	Plate	RepQuad
-DLR00016242	2009-12-18_17-00-00	27	SD/MSG -ARG -HIS -LYS +Canavanine +clonNAT +G418 +Thialysine	cSGA v2 r1	BooneSDLV2	15	1
-DLR00015381	2009-12-19_13-10-00	27	SD/MSG -ARG -HIS -LYS +Canavanine +clonNAT +G418 +Thialysine	cSGA v2 r2	BooneSDLV2	15	2
-DLR00014488	2010-01-14_16-45-00	27	SD/MSG -ARG -HIS -LYS +Canavanine +clonNAT +G418 +Thialysine	cSGA v2 r3	BooneSDLV2	15	3
-DLR00015567	2010-01-15_16-40-00	27	SD/MSG -ARG -HIS -LYS +Canavanine +clonNAT +G418 +Thialysine	cSGA v2 r4	BooneSDLV2	15	4
-DLR00015153	2010-01-18_16-35-00	27	SD/MSG -ARG -HIS -LYS +Canavanine +clonNAT +G418 +Thialysine	cSGA v3 r1	BooneSDLV3	15	1
-DLR00015102	2010-01-25_16-50-00	27	SD/MSG -ARG -HIS -LYS +Canavanine +clonNAT +G418 +Thialysine	cSGA v3r2	BooneSDLV3	15	2
-DLR00016036	2010-02-01_17-14-00	27	SD/MSG -ARG -HIS -LYS +Canavanine +clonNAT +G418 +Thialysine	cSGA v3r3	BooneSDLV3	15	3
-DLR00014791	2010-02-03_16-50-00	27	SD/MSG -ARG -HIS -LYS +Canavanine +clonNAT +G418 +Thialysine	cSGA v3r4	BooneSDLV3	15	4
