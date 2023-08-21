@@ -1997,6 +1997,7 @@ sar.gc.coef <- function(fit,index=c(1,2)) {
 #' @param index a pair of component indices for multiple time series 
 #' or a sequence of lags for single time series (default = \code{c(1,2)})
 #' @param nsim number of bootstrap samples (default = 1000)
+#' @param method method of residual calculation: \code{"ar"} (default) or \code{"sar"}
 #' @param n.cores number of cores for parallel computing (default = 1)
 #' @param mthreads if \code{TRUE}, multithread BLAS is enabled when available (default = \code{FALSE}, required for parallel computing) 
 #' @param seed seed for random sampling (default = \code{1234567})
@@ -2012,7 +2013,7 @@ sar.gc.coef <- function(fit,index=c(1,2)) {
 #' tau <- seq(0.1,0.9,0.05)
 #' y.sar <- qspec.sar(cbind(y1,y2),tau=tau,p=1)
 #' A.sim <- sar.gc.bootstrap(y.sar$qser,y.sar$fit,index=c(1,2),nsim=5)
-sar.gc.bootstrap <- function(y.qser,fit,index=c(1,2),nsim=1000,n.cores=1,mthreads=FALSE,seed=1234567) {
+sar.gc.bootstrap <- function(y.qser,fit,index=c(1,2),nsim=1000,method=c("ar","sar"),n.cores=1,mthreads=FALSE,seed=1234567) {
 
   simulate_qser_array <- function(resid,sample.idx,fit,idx0) {
   # this function simulates quantile series under H0 from bootstrap samples of residuals
@@ -2022,7 +2023,6 @@ sar.gc.bootstrap <- function(y.qser,fit,index=c(1,2),nsim=1000,n.cores=1,mthread
   #        idx0 = indices of SAR coefficients to set to zero under H0
   # output: nc*n*ntau array of simulated quantile series
       p <- fit$p
-	  A <- fit$A
       nc <- dim(resid)[1]
 	  n <- dim(resid)[2] + p
       ntau <- dim(resid)[3]
@@ -2033,14 +2033,14 @@ sar.gc.bootstrap <- function(y.qser,fit,index=c(1,2),nsim=1000,n.cores=1,mthread
         for(jj in c((p+1):nn)) {
           if(nc == 1) {
             for(j in c(1:p)) {
-              A0 <- A[j,ell]
+              A0 <- fit$A[j,ell]
               if(j %in% idx0) A0 <- 0
               A0 <- matrix(A0,ncol=nc,nrow=nc)			  
               qser.sim[,jj,ell] <- qser.sim[,jj,ell] + A0 %*% matrix(qser.sim[,jj-j,ell],nrow=nc)
             }		  
           } else {
             for(j in c(1:p)) {
-              A0 <- A[,,j,ell]
+              A0 <- fit$A[,,j,ell]
               A0[idx0[1],idx0[2]] <- 0
               qser.sim[,jj,ell] <- qser.sim[,jj,ell] + A0 %*% matrix(qser.sim[,jj-j,ell],nrow=nc)
             } 
@@ -2052,7 +2052,7 @@ sar.gc.bootstrap <- function(y.qser,fit,index=c(1,2),nsim=1000,n.cores=1,mthread
       return(qser.sim)
   }
 
-  check_for_validity <- function(index,nc,p) {
+  test_for_validity <- function(index,nc,p) {
     if(p==0) {
       stop("method not applicable to order 0 models!")	  
     }
@@ -2070,18 +2070,50 @@ sar.gc.bootstrap <- function(y.qser,fit,index=c(1,2),nsim=1000,n.cores=1,mthread
     }
   }
   
+  sar_residual <- function(y.qser,fit) {
+    p <- fit$p
+    n <- fit$n
+    ntau <- length(fit$tau)
+    if(is.matrix(y.qser)) y.qser <- array(y.qser,dim=c(1,dim(y.qser)))  
+    nc <- dim(y.qser)[1]  
+	if(p > 0) {
+      resid <- array(0,dim=c(nc,n,ntau))
+      for(l in c(1:ntau)) {
+	    if(nc > 1) {
+          for(tt in c((p+1):n)) {
+            for(j in c(1:p)) resid[,tt,l] <- resid[,tt,l] + fit$A[,,j,l] %*% y.qser[,tt-j,l]
+          }
+		} else {
+          for(tt in c((p+1):n)) {
+            for(j in c(1:p)) resid[1,tt,l] <- resid[1,tt,l] + fit$A[j,l] %*% y.qser[1,tt-j,l]
+          }		
+		}
+      }
+	  resid <- y.qser - resid
+      resid <- resid[,-c(1:p),]
+	} else {
+	  resid <- y.qser
+	}
+    resid
+  }
+
   if(is.matrix(y.qser)) y.qser <- array(y.qser,dim=c(1,dim(y.qser)))  
   nc <- dim(y.qser)[1]
   n <- dim(y.qser)[2]
   ntau <- dim(y.qser)[3]
   p <- fit$p
   
-  check_for_validity(index,nc,p) 
+  test_for_validity(index,nc,p) 
   
-  # compute residuals from AR model fitted to QSER for each quantile
-  resid <- qser2ar(y.qser,p=p)$resid
+  if(method[1]=="ar") {
+    # compute residuals from AR model fitted to QSER for each quantile
+    resid <- qser2ar(y.qser,p=p)$resid
+  } else {
+    # compute residuals from SAR model fitted to QSER
+    resid <- sar_residual(y.qser,fit)
+  }
   if(nc==1) resid <- array(resid,dim=c(1,dim(resid)))
-  
+   
   # generate bootstrap sampling of time stamps
   nn <- 2*n
   set.seed(seed)
@@ -2089,7 +2121,7 @@ sar.gc.bootstrap <- function(y.qser,fit,index=c(1,2),nsim=1000,n.cores=1,mthread
   for(sim.idx in c(1:nsim)) {
     idx[[sim.idx]] <- sample(c(1:dim(resid)[2]),nn,replace=TRUE)
   }
-
+  
   `%dopar%` <- foreach::`%dopar%`
   `%do%` <- foreach::`%do%`
   if(n.cores > 1) {
@@ -2118,7 +2150,6 @@ sar.gc.bootstrap <- function(y.qser,fit,index=c(1,2),nsim=1000,n.cores=1,mthread
   }
   return(A.sim)
 }
-
 
 
 #' Wald Test and Confidence Band for SAR-Based Granger-Causality Analysis
@@ -2202,6 +2233,7 @@ sar.gc.test <- function(A,A.sim,sel.lag=NULL,sel.tau=NULL) {
 #' @param index a pair of component indices for multiple time series 
 #' or a sequence of lags for single time series (default = \code{c(1,2)})
 #' @param nsim number of bootstrap samples (default = 1000)
+#' @param method method of residual calculation: \code{"ar"} (default) or \code{"sar"}
 #' @param n.cores number of cores for parallel computing (default = 1)
 #' @param mthreads if \code{TRUE}, multithread BLAS is enabled when available (default = \code{FALSE}, required for parallel computing) 
 #' @param seed seed for random sampling (default = \code{1234567})
@@ -2221,7 +2253,7 @@ sar.gc.test <- function(A,A.sim,sel.lag=NULL,sel.tau=NULL) {
 #' y2.sar <- qspec.sar(cbind(y12,y22),tau=tau,p=1)
 #' A1.sim <- sar.eq.bootstrap(y1.sar$qser,y1.sar$fit,y2.sar$fit,index=c(1,2),nsim=5)
 #' A2.sim <- sar.eq.bootstrap(y2.sar$qser,y2.sar$fit,y1.sar$fit,index=c(1,2),nsim=5)
-sar.eq.bootstrap <- function(y.qser,fit,fit2,index=c(1,2),nsim=1000,n.cores=1,mthreads=FALSE,seed=1234567) {
+sar.eq.bootstrap <- function(y.qser,fit,fit2,index=c(1,2),nsim=1000,method=c("ar","sar"),n.cores=1,mthreads=FALSE,seed=1234567) {
 
   simulate_qser_array_eq <- function(resid,sample.idx,fit,fit2,idx0) {
   # this function simulates quantile series under H0 from bootstrap samples of residuals
@@ -2279,7 +2311,34 @@ sar.eq.bootstrap <- function(y.qser,fit,fit2,index=c(1,2),nsim=1000,n.cores=1,mt
       }
     }
   }
-  
+    
+  sar_residual <- function(y.qser,fit) {
+    p <- fit$p
+    n <- fit$n
+    ntau <- length(fit$tau)
+    if(is.matrix(y.qser)) y.qser <- array(y.qser,dim=c(1,dim(y.qser)))  
+    nc <- dim(y.qser)[1]  
+	if(p > 0) {
+      resid <- array(0,dim=c(nc,n,ntau))
+      for(l in c(1:ntau)) {
+	    if(nc > 1) {
+          for(tt in c((p+1):n)) {
+            for(j in c(1:p)) resid[,tt,l] <- resid[,tt,l] + fit$A[,,j,l] %*% y.qser[,tt-j,l]
+          }
+		} else {
+          for(tt in c((p+1):n)) {
+            for(j in c(1:p)) resid[1,tt,l] <- resid[1,tt,l] + fit$A[j,l] %*% y.qser[1,tt-j,l]
+          }		
+		}
+      }
+	  resid <- y.qser - resid
+      resid <- resid[,-c(1:p),]
+	} else {
+	  resid <- y.qser
+	}
+    resid
+  }
+ 
   if(is.matrix(y.qser)) y.qser <- array(y.qser,dim=c(1,dim(y.qser)))  
   nc <- dim(y.qser)[1]
   n <- dim(y.qser)[2]
@@ -2288,8 +2347,14 @@ sar.eq.bootstrap <- function(y.qser,fit,fit2,index=c(1,2),nsim=1000,n.cores=1,mt
   
   check_for_validity(index,nc,p) 
   
-  # compute residuals from AR model fitted to QSER for each quantile
-  resid <- qser2ar(y.qser,p=p)$resid
+  # compute residauls from sample 1
+  if(method[1]=="ar") {
+    # from AR model fitted to QSER for each quantile
+    resid <- qser2ar(y.qser,p=p)$resid
+  } else {
+    # from SAR model fitted to QSER
+    resid <- sar_residual(y.qser,fit)
+  }
   if(nc==1) resid <- array(resid,dim=c(1,dim(resid)))
   
   # generate bootstrap sampling of time stamps

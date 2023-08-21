@@ -1,8 +1,8 @@
 Package: qfa
 Type: Package
 Title: Quantile-Frequency Analysis (QFA) of Time Series
-Version: 2.0
-Date: 2023-05-16
+Version: 2.1
+Date: 2023-08-21
 Authors@R: c(
 	person("Ta-Hsin", "Li", role = c("cre","aut"), email = "thl@us.ibm.com")
 	)
@@ -16,7 +16,7 @@ URL: https://www.r-project.org, https://github.com/IBM/qfa
 NeedsCompilation: yes
 Encoding: UTF-8
 RoxygenNote: 7.2.1
-Packaged: 2023-05-17 15:51:33 UTC; 991216897
+Packaged: 2023-08-21 17:34:42 UTC; 991216897
 Author: Ta-Hsin Li [cre, aut]
 Repository: CRAN
-Date/Publication: 2023-05-17 16:10:07 UTC
+Date/Publication: 2023-08-21 20:40:02 UTC
