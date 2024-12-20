@@ -1,6 +1,6 @@
 # -- Library of R functions for Quantile-Frequency Analysis (QFA) --
-# by Ta-Hsin Li  (thl@us.ibm.com)  October 30, 2022; April 8, 2023
-
+# by Ta-Hsin Li  (thl024@outlook.com)  October 30, 2022; April 8, 2023; August 21, 2023;
+# November 26, 2024; December 14, 2024
 
 #' Trigonometric Quantile Regression (TQR)
 #'
@@ -202,11 +202,11 @@ qfa.plot <- function(freq,tau,rqper,rg.qper=range(rqper),rg.tau=range(tau),rg.fr
 }
 
 
-#' Quantile Periodogram and Cross-Periodogram (QPER)
+#' Quantile Periodogram (QPER)
 #'
-#' This function computes quantile periodogram/cross-periodogram (QPER) from QDFT.
+#' This function computes quantile periodogram (QPER) from QDFT.
 #' @param y.qdft matrix or array of QDFT from \code{qdft()}
-#' @return matrix or array of quantile periodogram/cross-periodogram
+#' @return matrix or array of quantile periodogram
 #' @export
 #' @examples
 #' # single time series
@@ -254,7 +254,7 @@ qdft2qper <- function(y.qdft) {
 #' Quantile Autocovariance Function (QACF)
 #'
 #' This function computes quantile autocovariance function (QACF) from QDFT.
-#' @param y.qdft matrix or array of QDFT from \code{qdft()} or SQDFT from \code{sqdft()}
+#' @param y.qdft matrix or array of QDFT from \code{qdft()}
 #' @param return.qser if \code{TRUE}, return quantile series (QSER) along with QACF
 #' @return matrix or array of quantile autocovariance function if \code{return.sqer = FALSE} (default), else a list with the following elements:
 #'   \item{qacf}{matirx or array of quantile autocovariance function}
@@ -323,7 +323,7 @@ qdft2qacf <- function(y.qdft,return.qser=FALSE) {
 #' Quantile Series (QSER)
 #'
 #' This function computes quantile series (QSER) from QDFT.
-#' @param y.qdft matrix or array of QDFT from \code{qdft()} or SQDFT from \code{sqdft()}
+#' @param y.qdft matrix or array of QDFT from \code{qdft()}
 #' @return matrix or array of quantile series
 #' @import 'stats'
 #' @export
@@ -359,34 +359,16 @@ qdft2qser <- function(y.qdft) {
 }
 
 
-#' Lag-Window (LW) Estimator of Quantile Spectrum
-#'
-#' This function computes lag-window (LW) estimate of quantile spectrum/cross-spectrum from QACF.
-#' @param y.qacf matrix or array of pre-calculated QACF from \code{qdft2qacf()}
-#' @param M bandwidth parameter of lag window (default = \code{NULL}: quantile periodogram)
-#' @return A list with the following elements:
-#'   \item{spec}{matrix or array of quantile spectrum/cross-spectrum}
-#'   \item{lw}{lag-window sequence}
-#' @import 'stats'
-#' @export
-#' @examples
-#' # single time series
-#' y1 <- stats::arima.sim(list(order=c(1,0,0), ar=0.5), n=64)
-#' tau <- seq(0.1,0.9,0.05)
-#' y.qdft <- qdft(y1,tau)
-#' y.qacf <- qdft2qacf(y.qdft)
-#' y.qper.lw <- qspec.lw(y.qacf,M=5)$spec
-#' n <- length(y1)
-#' ff <- c(0:(n-1))/n
-#' sel.f <- which(ff > 0 & ff < 0.5)
-#' qfa.plot(ff[sel.f],tau,Re(y.qper.lw[sel.f,]))
-#' # multiple time series
-#' y2 <- stats::arima.sim(list(order=c(1,0,0), ar=-0.5), n=64)
-#' y.qdft <- qdft(cbind(y1,y2),tau)
-#' y.qacf <- qdft2qacf(y.qdft)
-#' y.qper.lw <- qspec.lw(y.qacf,M=5)$spec
-#' qfa.plot(ff[sel.f],tau,Re(y.qper.lw[1,2,sel.f,]))
-qspec.lw <- function(y.qacf,M=NULL) {
+# Lag-Window (LW) Estimator of Quantile Spectrum
+#
+# This function computes lag-window (LW) estimate of quantile spectrum from QACF.
+# @param y.qacf matrix or array of pre-calculated QACF from \code{qdft2qacf()}
+# @param M bandwidth parameter of lag window (default = \code{NULL}: quantile periodogram)
+# @return A list with the following elements:
+#   \item{spec}{matrix or array of quantile spectrum}
+#   \item{lw}{lag-window sequence}
+# @import 'stats'
+qacf2speclw <- function(y.qacf,M=NULL) {
   
   if(is.matrix(y.qacf)) y.qacf <- array(y.qacf,dim=c(1,1,dim(y.qacf)))
   
@@ -437,8 +419,8 @@ qspec.lw <- function(y.qacf,M=NULL) {
 
 #' Quantile Coherence Spectrum
 #'
-#' This function computes quantile coherence spectrum (QCOH) from quantile spectrum and cross-spectrum of multiple time series.
-#' @param qspec array of quantile spectrum/cross-spectrum
+#' This function computes quantile coherence spectrum (QCOH) from quantile spectrum of multiple time series.
+#' @param qspec array of quantile spectrum 
 #' @param k index of first series (default = 1)
 #' @param kk index of second series (default = 2)
 #' @return matrix of quantile coherence evaluated at Fourier frequencies in (0,0.5)
@@ -451,7 +433,7 @@ qspec.lw <- function(y.qacf,M=NULL) {
 #' ff <- c(0:(n-1))/n
 #' sel.f <- which(ff > 0 & ff < 0.5)
 #' y.qacf <- qacf(cbind(y1,y2),tau)
-#' y.qper.lw <- qspec.lw(y.qacf,M=5)$spec
+#' y.qper.lw <- qspec.lw(y.qacf=y.qacf,M=5)$spec
 #' y.qcoh <- qspec2qcoh(y.qper.lw,k=1,kk=2)
 #' qfa.plot(ff[sel.f],tau,y.qcoh)
 qspec2qcoh<-function(qspec,k=1,kk=2) {
@@ -535,35 +517,35 @@ qsmooth <- function(x,link=c('linear','log'),method=c('gamm','sp'),spar="GCV") {
 
 
 
-#' Quantile Smoothing of Quantile Periodogram or Spectral Estimate
-#'
-#'  This function computes quantile-smoothed version of quantile periodogram/cross-periodogram (QPER) or other quantile spectral estimate.
-#' @param y.qper matrix or array of quantile periodogram/cross-periodogram or spectral estimate
-#' @param method smoothing method: \code{"gamm"} for \code{mgcv::gamm()} (default), 
-#' \code{"sp"} for \code{stats::smooth.spline()}
-#' @param spar smoothing parameter in \code{smooth.spline()} if \code{method = "sp"} (default = \code{"GCV"})
-#' @param n.cores number of cores for parallel computing (default = 1)
-#' @param cl pre-existing cluster for repeated parallel computing (default = \code{NULL})
-#' @return matrix or array of quantile-smoothed quantile spectral estimate
-#' @import 'foreach'
-#' @import 'parallel'
-#' @import 'doParallel'
-#' @import 'mgcv'
-#' @import 'nlme'
-#' @export
-#' @examples
-#' y1 <- stats::arima.sim(list(order=c(1,0,0), ar=0.5), n=64)
-#' y2 <- stats::arima.sim(list(order=c(1,0,0), ar=-0.5), n=64)
-#' tau <- seq(0.1,0.9,0.05)
-#' n <- length(y1)
-#' ff <- c(0:(n-1))/n
-#' sel.f <- which(ff > 0 & ff < 0.5)
-#' y.qdft <- qdft(cbind(y1,y2),tau)
-#' y.qacf <- qdft2qacf(y.qdft)
-#' y.qper.lw <- qspec.lw(y.qacf,M=5)$spec
-#' qfa.plot(ff[sel.f],tau,Re(y.qper.lw[1,1,sel.f,]))
-#' y.qper.lwqs <- qsmooth.qper(y.qper.lw,method="sp",spar=0.9)
-#' qfa.plot(ff[sel.f],tau,Re(y.qper.lwqs[1,1,sel.f,]))
+# Quantile Smoothing of Quantile Periodogram or Spectral Estimate
+#
+# This function computes quantile-smoothed version of quantile periodogram or other quantile spectral estimate.
+# @param y.qper matrix or array of quantile periodogram or spectral estimate
+# @param method smoothing method: \code{"gamm"} for \code{mgcv::gamm()} (default), 
+# \code{"sp"} for \code{stats::smooth.spline()}
+# @param spar smoothing parameter in \code{smooth.spline()} if \code{method = "sp"} (default = \code{"GCV"})
+# @param n.cores number of cores for parallel computing (default = 1)
+# @param cl pre-existing cluster for repeated parallel computing (default = \code{NULL})
+# @return matrix or array of quantile-smoothed quantile spectral estimate
+# @import 'foreach'
+# @import 'parallel'
+# @import 'doParallel'
+# @import 'mgcv'
+# @import 'nlme'
+# @export
+# @examples
+# y1 <- stats::arima.sim(list(order=c(1,0,0), ar=0.5), n=64)
+# y2 <- stats::arima.sim(list(order=c(1,0,0), ar=-0.5), n=64)
+# tau <- seq(0.1,0.9,0.05)
+# n <- length(y1)
+# ff <- c(0:(n-1))/n
+# sel.f <- which(ff > 0 & ff < 0.5)
+# y.qdft <- qdft(cbind(y1,y2),tau)
+# y.qacf <- qdft2qacf(y.qdft)
+# y.qper.lw <- qspec.lw(y.qacf=y.qacf,M=5)$spec
+# qfa.plot(ff[sel.f],tau,Re(y.qper.lw[1,1,sel.f,]))
+# y.qper.lwqs <- qsmooth.qper(y.qper.lw,method="sp",spar=0.9)
+# qfa.plot(ff[sel.f],tau,Re(y.qper.lwqs[1,1,sel.f,]))
 qsmooth.qper <- function(y.qper,method=c("gamm","sp"),spar="GCV",n.cores=1,cl=NULL) {
   
   if(is.matrix(y.qper)) y.qper <- array(y.qper,dim=c(1,1,dim(y.qper)))
@@ -623,86 +605,11 @@ qsmooth.qper <- function(y.qper,method=c("gamm","sp"),spar="GCV",n.cores=1,cl=NU
 
 
 
-#' Quantile Smoothing of Quantile Discrete Fourier Transform
-#'
-#' This function computes quantile-smoothed version of quantile discrete Fourier transform (QDFT).
-#' @param y.qdft matrix or array of QDFT from \code{qdft()}
-#' @param method smoothing method: \code{"gamm"} for \code{mgcv::gamm()} (default), 
-#' \code{"sp"} for \code{stats::smooth.spline()}
-#' @param spar smoothing parameter in \code{smooth.spline()} if \code{method = "sp"} (default = \code{"GCV"})
-#' @param n.cores number of cores for parallel computing (default = 1)
-#' @param cl pre-existing cluster for repeated parallel computing (default = NULL)
-#' @return matrix or array of quantile-smoothed QDFT
-#' @import 'stats'
-#' @import 'foreach'
-#' @import 'parallel'
-#' @import 'doParallel'
-#' @import 'mgcv'
-#' @import 'nlme'
-#' @export
-#' @examples
-#' y1 <- stats::arima.sim(list(order=c(1,0,0), ar=0.5), n=64)
-#' y2 <- stats::arima.sim(list(order=c(1,0,0), ar=-0.5), n=64)
-#' tau <- seq(0.1,0.9,0.05)
-#' n <- length(y1)
-#' ff <- c(0:(n-1))/n
-#' sel.f <- which(ff > 0 & ff < 0.5)
-#' y.qdft <- qdft(cbind(y1,y2),tau)
-#' y.qdft <- qsmooth.qdft(y.qdft,method="sp",spar=0.9)
-#' y.qacf <- qdft2qacf(y.qdft)
-#' y.qper.qslw <- qspec.lw(y.qacf,M=5)$spec
-#' qfa.plot(ff[sel.f],tau,Re(y.qper.qslw[1,1,sel.f,]))
-qsmooth.qdft<-function(y.qdft,method=c('gamm','sp'),spar="GCV",n.cores=1,cl=NULL) {
-
-  if(is.matrix(y.qdft)) y.qdft <- array(y.qdft,dim=c(1,nrow(y.qdft),ncol(y.qdft)))
-  nc<-dim(y.qdft)[1]
-  nf<-dim(y.qdft)[2] 
-  ntau<-dim(y.qdft)[3]
-  method <- method[1]
-  f2 <- c(0:(nf-1))/nf
-  # half of the Fourier frequencies excluding 0 for smoothing
-  sel.f1 <- which(f2 > 0 & f2 <= 0.5)
-  # half Fourier frequencies excluding 0 and 0.5 for freq folding
-  sel.f2 <- which(f2 > 0 & f2 < 0.5)  
-  sel.f3 <- which(f2 > 0.5)
-  keep.cl <- TRUE
-  if(n.cores>1 & is.null(cl)) {
-    cl <- parallel::makeCluster(n.cores)
-    parallel::clusterExport(cl, c("qsmooth"))
-    doParallel::registerDoParallel(cl)
-    keep.cl <- FALSE
-  }
-  spar0 <- spar
-  spars <- NULL
-  qdft.sm <- y.qdft
-  for(k in c(1:nc)) {
-    spars <- rbind(spars,c(k,spar0))
-	if(!is.null(cl)) {
-	  tmp1 <- t(parallel::parApply(cl,Re(y.qdft[k,sel.f1,]),1,qsmooth,method=method,spar=spar0))
-	  tmp2 <- t(parallel::parApply(cl,Im(y.qdft[k,sel.f1,]),1,qsmooth,method=method,spar=spar0))
-	} else {
-	  tmp1 <- t(apply(Re(y.qdft[k,sel.f1,]),1,qsmooth,method=method,spar=spar0))
-	  tmp2 <- t(apply(Im(y.qdft[k,sel.f1,]),1,qsmooth,method=method,spar=spar0))
-	}
-	qdft.sm[k,sel.f1,] <- tmp1 + 1i* tmp2	
-    for(j in c(1:ntau)) {
-	  qdft.sm[k,sel.f3,j] <- Conj(rev(qdft.sm[k,sel.f2,j]))
-	}
-  }
-  if(n.cores>1 & !keep.cl) {
-    parallel::stopCluster(cl)
-    cl <- NULL
-  } 
-  if(nc==1) qdft.sm <- matrix(qdft.sm,ncol=ntau)
-  return(qdft.sm)
-}  
-
-
 #' Kullback-Leibler Divergence of Quantile Spectral Estimate
 #'
 #' This function computes Kullback-Leibler divergence (KLD) of quantile spectral estimate.
 #' @param y.qper matrix or array of quantile spectral estimate from, e.g., \code{qspec.lw()}
-#' @param qspec matrix of array of true quantile spectrum/cross-spectrum (same dimension as \code{y.qper})
+#' @param qspec matrix of array of true quantile spectrum (same dimension as \code{y.qper})
 #' @param sel.f index of selected frequencies for computation (default = \code{NULL}: all frequencies)
 #' @param sel.tau index of selected quantile levels for computation (default = \code{NULL}: all quantile levels)
 #' @return real number of Kullback-Leibler divergence
@@ -908,181 +815,6 @@ sqr.fit <- function(y,X,tau,c0,d=1,weighted=FALSE,mthreads=FALSE) {
 
 
 
-#' Trigonometric Spline Quantile Regression (TSQR)
-#'
-#' This function computes trigonometric spline quantile regression (TSQR) for univariate time series at a single frequency.
-#' @param y vector of time series
-#' @param f0 frequency in [0,1)
-#' @param tau sequence of quantile levels in (0,1)
-#' @param c0 penalty parameter
-#' @param d subsampling rate of quantile levels (default = 1)
-#' @param weighted if \code{TRUE}, penalty function is weighted (default = \code{FALSE})
-#' @param prepared if \code{TRUE}, intercept is removed and coef of cosine is doubled when \code{f0 = 0.5}
-#' @return object of \code{sqr.fit()} (coefficients in \code{$coef})
-#' @export
-#' @examples
-#' y <- stats::arima.sim(list(order=c(1,0,0), ar=0.5), n=64)
-#' tau <- seq(0.1,0.9,0.05)
-#' fit <- tqr.fit(y,f0=0.1,tau=tau)
-#' fit.sqr <- tsqr.fit(y,f0=0.1,tau=tau,c0=0.02,d=4)
-#' plot(tau,fit$coef[1,],type='p',xlab='QUANTILE LEVEL',ylab='TQR COEF')
-#' lines(tau,fit.sqr$coef[1,],type='l')
-tsqr.fit <- function(y,f0,tau,c0,d=1,weighted=FALSE,prepared=TRUE) {
-  
-  create_trig_design_matrix <- function(f0,n) {
-  # create design matrix for trignometric regression of time series
-  # input: f0 = frequency in [0,1)
-  #         n = length of time series
-    tt <- c(1:n)
-    if(f0 != 0.5 & f0 != 0) {
-      X <- cbind(rep(1,n),cos(2*pi*f0*tt),sin(2*pi*f0*tt))
-    }
-    if(f0 == 0.5) {
-      X <- cbind(rep(1,n),cos(2*pi*0.5*tt))
-    }
-    if(f0 == 0) {
-      X <- matrix(rep(1,n),ncol=1)
-    }
-    X
-  }
-
-  fix_tqr_coef <- function(coef) {
-  # prepare coef from tqr for qdft
-  # input:  coef = p*ntau tqr coefficient matrix from tqr.fit()
-  # output: 2*ntau matrix of tqr coefficients
-    ntau <- ncol(coef)
-    if(nrow(coef)==1) {   
-      # for f = 0
-      coef <- rbind(rep(0,ntau),rep(0,ntau))
-    } else if(nrow(coef)==2) {  
-      # for f = 0.5: rescale coef of cosine by 2 so qdft can be defined as usual
-      coef <- rbind(2*coef[2,],rep(0,ntau))
-    } else {
-      # for f in (0,0.5)
-      coef <- coef[-1,]
-    }
-    coef
-  }
-
-  n <- length(y)
-  X <- create_trig_design_matrix(f0,n)
-  fit <- sqr.fit(y,X,tau,c0=c0,d=d,weighted=weighted)
-  if(prepared) fit$coefficients <- fix_tqr_coef(fit$coefficients)
-  fit
-}
-
-
-#' Spline Quantile Discrete Fourier Transform (SQDFT)
-#'
-#' This function computes spline quantile discrete Fourier transform (SQDFT) for univariate or multivariate time series
-#' through trigonometric spline quantile regression.
-#' @param y vector or matrix of time series (if matrix, \code{nrow(y)} = length of time series)
-#' @param tau sequence of quantile levels in (0,1)
-#' @param c0 penalty parameter
-#' @param d subsampling rate of quantile levels (default = 1)
-#' @param weighted if \code{TRUE}, penalty function is weighted (default = \code{FALSE})
-#' @param n.cores number of cores for parallel computing (default = 1)
-#' @param cl pre-existing cluster for repeated parallel computing (default = \code{NULL})
-#' @return matrix or array of the spline quantile discrete Fourier transform of \code{y}
-#' @import 'stats'
-#' @import 'splines'
-#' @import 'RhpcBLASctl'
-#' @import 'quantreg'
-#' @import 'foreach'
-#' @import 'parallel'
-#' @import 'doParallel'
-#' @export
-#' @examples
-#' y <- stats::arima.sim(list(order=c(1,0,0), ar=0.5), n=64)
-#' tau <- seq(0.1,0.9,0.05)
-#' y.sqdft <- sqdft(y,tau,c0=0.02,d=4)
-#' n <- length(y)
-#' ff <- c(0:(n-1))/n
-#' sel.f <- which(ff > 0 & ff < 0.5)
-#' y.qacf <- qdft2qacf(y.sqdft)
-#' y.qper.sqrlw <- qspec.lw(y.qacf,M=5)$spec
-#' qfa.plot(ff[sel.f],tau,Re(y.qper.sqrlw[sel.f,]))
-sqdft <- function(y,tau,c0=0.02,d=4,weighted=FALSE,n.cores=1,cl=NULL) {
-
-  z <- function(x) { x <- matrix(x,nrow=2); x[1,]-1i*x[2,] }
-
-  extend_qdft <- function(y,tau,result,sel.f) {
-  # define qdft from tqr coefficients
-  # input: y = ns*nc-matrix or ns-vector of time series
-  #        tau = ntau-vector of quantile levels
-  #        result = list of qdft in (0,0.5]
-  #        sel.f = index of Fourier frequencies in (0,0.5)
-  # output: out = nc*ns*ntau-array or ns*ntau matrix of qdft
-
-    if(!is.matrix(y)) y <- matrix(y,ncol=1)
-    nc <- ncol(y)
-    ns <- nrow(y)
-    ntau <- length(tau)
-  
-    out <- array(NA,dim=c(nc,ns,ntau))
-    for(k in c(1:nc)) {
-      # define QDFT at freq 0 as ns * quantile
-      out[k,1,] <- ns * stats::quantile(y[,k],tau)
-      # retrieve qdft for freq in (0,0.5]
-      tmp <- matrix(unlist(result[[k]]),ncol=ntau,byrow=TRUE)
-      # define remaining values by conjate symmetry (excluding f=0.5) 
-      tmp2 <- NULL
-      for(j in c(1:ntau)) {
-        tmp2 <- cbind(tmp2,rev(Conj(tmp[sel.f,j])))
-      }
-      # assemble & rescale everything by ns/2 so that periodogram = |dft|^2/ns
-      out[k,c(2:ns),] <- rbind(tmp,tmp2) * ns/2
-    }
-    if(nc == 1) out <- matrix(out[1,,],ncol=ntau)
-    out
-  }
-
-  if(!is.matrix(y)) y <- matrix(y,ncol=1)
-  ns <- nrow(y)
-  nc <- ncol(y)
-  f2 <- c(0:(ns-1))/ns
-  # compute QR at half of the Fourier frequencies, excluding 0
-  f <- f2[which(f2 > 0 & f2 <= 0.5)]
-  sel.f <- which(f < 0.5)
-  nf <- length(f)
-  ntau <- length(tau)
-  keep.cl <- TRUE
-  if(n.cores>1 & is.null(cl)) {
-    cl <- parallel::makeCluster(n.cores)
-    parallel::clusterExport(cl, c("tsqr.fit","sqr.fit","rq.fit.fnb2"))
-    doParallel::registerDoParallel(cl)
-    keep.cl <- FALSE
-  }
-  `%dopar%` <- foreach::`%dopar%`
-  `%do%` <- foreach::`%do%`
-  # qdft for f in (0,0.5]
-  i <- 0  
-  result<-list()
-  for(k in c(1:nc)) {
-    yy <- y[,k] 
-    if(n.cores>1) {
-        tmp <- foreach::foreach(i=1:nf, .packages='quantreg') %dopar% {
-	    coef <- tsqr.fit(yy,f[i],tau,c0=c0,d=d,weighted=weighted)$coef
-      }
-    } else {
-      tmp <- foreach::foreach(i=1:nf) %do% {
-        coef <- tsqr.fit(yy,f[i],tau,c0=c0,d=d,weighted=weighted)$coef
-      }
-    }
-    # tmp = a list over freq of 2 x ntau coefficiets 
-    tmp <- lapply(tmp,FUN=function(x) {apply(x,2,z)})
-    result[[k]] <- tmp
-  }
-  if(n.cores>1 & !keep.cl) {
-    parallel::stopCluster(cl)
-    cl <- NULL
-  }
-  # extend qdft to f=0 and f in (0.5,1) 
-  out <- extend_qdft(y,tau,result,sel.f)
-  return(out)
-}
-
-
 
 # -- new functions in version 2.0 for SAR and AR estimators of quantile spectra (4/8/2023) --
 
@@ -1145,9 +877,9 @@ qser <- function(y,tau,y.qdft=NULL,n.cores=1,cl=NULL) {
 }
 
 
-#' Quantile Periodogram and Cross-Periodogram (QPER)
+#' Quantile Periodogram (QPER)
 #'
-#' This function computes quantile periodogram/cross-periodogram (QPER) from time series 
+#' This function computes quantile periodogram (QPER) from time series 
 #' or quantile discrete Fourier transform (QDFT).
 #' @param y vector or matrix of time series (if matrix, \code{nrow(y)} = length of time series)
 #' @param tau sequence of quantile levels in (0,1)
@@ -1155,7 +887,7 @@ qser <- function(y,tau,y.qdft=NULL,n.cores=1,cl=NULL) {
 #' if \code{y.qdft} is supplied, \code{y} and \code{tau} can be left unspecified
 #' @param n.cores number of cores for parallel computing of QDFT if \code{y.qdft = NULL} (default = 1)
 #' @param cl pre-existing cluster for repeated parallel computing of QDFT (default = \code{NULL})
-#' @return matrix or array of quantile periodogram/cross-periodogram
+#' @return matrix or array of quantile periodogram
 #' @import 'foreach'
 #' @import 'parallel'
 #' @import 'doParallel'
@@ -1175,180 +907,15 @@ qper <- function(y,tau,y.qdft=NULL,n.cores=1,cl=NULL) {
 
 
 
-#' Lag-Window-Quantile-Smoothing (LWQS) Estimator of Quantile Spectrum
-#'
-#' This function computes lag-window-quantile-smoothing (LWQS) estimate of quantile spectrum/cross-spectrum 
-#' from time series or quantile autocovariance function (QACF).
-#' @param y vector or matrix of time series (if matrix, \code{nrow(y)} = length of time series)
-#' @param tau sequence of quantile levels in (0,1)
-#' @param y.qacf matrix or array of pre-calculated QACF (default = \code{NULL}: compute from \code{y} and \code{tau});
-#' if \code{y.qacf} is supplied, \code{y} and \code{tau} can be left unspecified
-#' @param M bandwidth parameter of lag window (default = \code{NULL}: quantile periodogram)
-#' @param method smoothing method: \code{"gamm"} for \code{mgcv::gamm()} (default), 
-#' \code{"sp"} for \code{stats::smooth.spline()}
-#' @param spar smoothing parameter in \code{smooth.spline()} if \code{method = "sp"} (default = \code{"GCV"})
-#' @param n.cores number of cores for parallel computing (default = 1)
-#' @param cl pre-existing cluster for repeated parallel computing (default = \code{NULL})
-#' @return A list with the following elements:
-#'   \item{spec}{matrix or array of quantile spectrum/cross-spectrum}
-#'   \item{spec.lw}{matrix or array of quantile spectrum/cross-spectrum without quantile smoothing}
-#'   \item{lw}{lag-window sequence}
-#'   \item{qacf}{matrix or array of quantile autocovariance function if \code{y.qacf = NULL}}
-#' @import 'stats'
-#' @import 'foreach'
-#' @import 'parallel'
-#' @import 'doParallel'
-#' @import 'mgcv'
-#' @import 'nlme'
-#' @export
-#' @examples
-#' y1 <- stats::arima.sim(list(order=c(1,0,0), ar=0.5), n=64)
-#' y2 <- stats::arima.sim(list(order=c(1,0,0), ar=-0.5), n=64)
-#' tau <- seq(0.1,0.9,0.05)
-#' n <- length(y1)
-#' ff <- c(0:(n-1))/n
-#' sel.f <- which(ff > 0 & ff < 0.5)
-#' y.qper.lwqs <- qspec.lwqs(cbind(y1,y2),tau,M=5,method="sp",spar=0.9)$spec
-#' qfa.plot(ff[sel.f],tau,Re(y.qper.lwqs[1,1,sel.f,]))
-qspec.lwqs <- function(y,tau,y.qacf=NULL,M=NULL,method=c("gamm","sp"),spar="GCV",n.cores=1,cl=NULL) {
-  return.qacf <- FALSE
-  if(is.null(y.qacf)) {
-    y.qacf <- qacf(y,tau,n.cores=n.cores,cl=cl)
-	return.qacf <- TRUE
-  }
-  y.lw <- qspec.lw(y.qacf,M)
-  y.qper.lwqs <- qsmooth.qper(y.lw$spec,method=method[1],spar=spar,n.cores=n.cores,cl=cl)
-  if(return.qacf) {
-    return(list(spec=y.qper.lwqs,spec.lw=y.lw$spec,lw=y.lw$lw,qacf=y.qacf))
-  } else {
-    return(list(spec=y.qper.lwqs,spec.lw=y.lw$spec,lw=y.lw$lw))
-  }  
-}
-
-
-
-#' Quantile-Smoothing-Lag-Window (QSLW) Estimator of Quantile Spectrum
-#'
-#' This function computes quantie-smoothing-lag-window (QSLW estimate of quantile spectrum/cross-spectrum 
-#' from time series or quantile discrete Fourier transform (QDFT).
-#' @param y vector or matrix of time series (if matrix, \code{nrow(y)} = length of time series)
-#' @param tau sequence of quantile levels in (0,1)
-#' @param y.qdft matrix or array of pre-calculated QDFT (default = \code{NULL}: compute from \code{y} and \code{tau});
-#' if \code{y.qdft} is supplied, \code{y} and \code{tau} can be left unspecified
-#' @param M bandwidth parameter of lag window (default = \code{NULL}: quantile periodogram)
-#' @param method smoothing method: \code{"gamm"} for \code{mgcv::gamm()} (default), 
-#' \code{"sp"} for \code{stats::smooth.spline()}
-#' @param spar smoothing parameter in \code{smooth.spline()} if \code{method = 'sp'} (default = \code{"GCV"})
-#' @param n.cores number of cores for parallel computing (default = 1)
-#' @param cl pre-existing cluster for repeated parallel computing (default = \code{NULL})
-#' @return A list with the following elements:
-#'   \item{spec}{matrix or array of quantile spectrum/cross-spectrum}
-#'   \item{lw}{lag-window sequence}
-#'   \item{qdft}{matrix or array of quantile discrete Fourier transform if \code{y.qdft = NULL}}
-#' @import 'stats'
-#' @import 'foreach'
-#' @import 'parallel'
-#' @import 'doParallel'
-#' @import 'mgcv'
-#' @import 'nlme'
-#' @export
-#' @examples
-#' y1 <- stats::arima.sim(list(order=c(1,0,0), ar=0.5), n=64)
-#' y2 <- stats::arima.sim(list(order=c(1,0,0), ar=-0.5), n=64)
-#' tau <- seq(0.1,0.9,0.05)
-#' n <- length(y1)
-#' ff <- c(0:(n-1))/n
-#' sel.f <- which(ff > 0 & ff < 0.5)
-#' y.qper.qslw <- qspec.qslw(cbind(y1,y2),tau,M=5,method="sp",spar=0.9)$spec
-#' qfa.plot(ff[sel.f],tau,Re(y.qper.qslw[1,1,sel.f,]))
-qspec.qslw <- function(y,tau,y.qdft=NULL,M=NULL,method=c("gamm","sp"),spar="GCV",n.cores=1,cl=NULL) {
-  return.qdft <- FALSE
-  if(is.null(y.qdft)) {
-    y.qdft <- qdft(y,tau,n.cores=n.cores,cl=cl)
-	return.qdft <- TRUE
-  }
-  y.qdft.qs  <- qsmooth.qdft(y.qdft,method=method[1],spar=spar,n.cores=n.cores,cl=cl)
-  y.qacf.qs <- qdft2qacf(y.qdft.qs)
-  y.qslw <- qspec.lw(y.qacf.qs,M)
-  if(return.qdft) {
-    return(list(spec=y.qslw$spec,lw=y.qslw$lw,qdft=y.qdft))
-  } else {
-    return(list(spec=y.qslw$spec,lw=y.qslw$lw))
-  }  
-}
-
-
-
-#' Spline-Quantile-Regression-Lag-Window (SQRLW) Estimator of Quantile Spectrum
-#'
-#' This function computes spline-quantile-regression-lag-window (SQRLW) estimate of quantile spectrum/cross-spectrum 
-#' from time series or spline quantile discrete Fourier transform (SQDFT).
-#' @param y vector or matrix of time series (if matrix, \code{nrow(y)} = length of time series)
-#' @param tau sequence of quantile levels in (0,1)
-#' @param y.sqdft matrix or array of pre-calculated SQDFT (default = \code{NULL}: compute from \code{y} and \code{tau});
-#' if \code{y.sqdft} is supplied, \code{y} and \code{tau} can be left unspecified
-#' @param M bandwidth parameter of lag window (default = \code{NULL}: quantile periodogram)
-#' @param c0 penalty parameter for SQDFT
-#' @param d subsampling rate of quantile levels for SQDFT (default = 1)
-#' @param weighted if \code{TRUE}, SQR penalty function is weighted (default = \code{FALSE})
-#' @param n.cores number of cores for parallel computing of SQDFT (default = 1)
-#' @param cl pre-existing cluster for repeated parallel computing of SQDFT (default = \code{NULL})
-#' @return A list with the following elements:
-#'   \item{spec}{matrix or array of quantile spectrum/cross-spectrum}
-#'   \item{lw}{lag-window sequence}
-#'   \item{sqdft}{matrix or array of spline quantile discrete Fourier transform if \code{y.sqdft = NULL}}
-#' @import 'stats'
-#' @import 'splines'
-#' @import 'RhpcBLASctl'
-#' @import 'quantreg'
-#' @import 'foreach'
-#' @import 'parallel'
-#' @import 'doParallel'
-#' @export
-#' @examples
-#' y1 <- stats::arima.sim(list(order=c(1,0,0), ar=0.5), n=64)
-#' y2 <- stats::arima.sim(list(order=c(1,0,0), ar=-0.5), n=64)
-#' tau <- seq(0.1,0.9,0.05)
-#' n <- length(y1)
-#' ff <- c(0:(n-1))/n
-#' sel.f <- which(ff > 0 & ff < 0.5)
-#' y.qper.sqrlw <- qspec.sqrlw(cbind(y1,y2),tau,M=5,c0=0.02,d=4)$spec
-#' qfa.plot(ff[sel.f],tau,Re(y.qper.sqrlw[1,1,sel.f,]))
-qspec.sqrlw <- function(y,tau,y.sqdft=NULL,M=NULL,c0=0.02,d=4,weighted=FALSE,n.cores=1,cl=NULL) {
-# this function computes SQR-LW estimate of quantile spectrum/cross-spectrum from time series or SQDFT
-# input: y = time series
-#        tau = quantile levels
-#        y.sqdft = pre-calculated SQDFT
-#        M = bandwidth of lag window
-#        c0 = penalty parameter for SQR
-#        d = downsampling rate of quantile levels for SQR
-#        weighted = TRUE if penalty in SQR is weighted
-#        n.cores = number of cores for parallel computing of SQDFT 
-#        cl = pre-existing cluster for parallel computing of SQDFT
-  return.sqdft <- FALSE
-  if(is.null(y.sqdft)) {
-    y.sqdft <- sqdft(y,tau,c0=c0,d=d,weighted=weighted,n.cores=n.cores,cl=cl)
-	return.sqdft <- TRUE
-  }
-  y.sqacf <- qdft2qacf(y.sqdft)
-  y.sqrlw <- qspec.lw(y.sqacf,M)
-  if(return.sqdft) {
-    return(list(spec=y.sqrlw$spec,lw=y.sqrlw$lw,sqdft=y.sqdft))
-  } else {
-    return(list(spec=y.sqrlw$spec,lw=y.sqrlw$lw))
-  }  
-}
-
-
-#' Quantile Spectrum from AR Model of Quantile Series
-#'
-#' This function computes quantile spectrum/cross-spectrum (QSPEC) from an AR model of quantile series (QSER).
-#' @param fit object of AR model from \code{qser2sar()} or \code{qser2ar()}
-#' @param freq sequence of frequencies in [0,1) (default = \code{NULL}: all Fourier frequencies)
-#' @return a list with the following elements:
-#'   \item{spec}{matrix or array of quantile spectrum/cross-spectrum}
-#'   \item{freq}{sequence of frequencies}
-#' @export
+# Quantile Spectrum from AR Model of Quantile Series
+#
+# This function computes quantile spectrum (QSPEC) from an AR model of Quantile Series (QSER).
+# @param fit object of AR model from \code{qser2sar()} or \code{qser2ar()}
+# @param freq sequence of frequencies in [0,1) (default = \code{NULL}: all Fourier frequencies)
+# @return a list with the following elements:
+#   \item{spec}{matrix or array of quantile spectrum}
+#   \item{freq}{sequence of frequencies}
+# @export
 ar2qspec<-function(fit,freq=NULL) {
   V <- fit$V
   A <- fit$A
@@ -1383,123 +950,6 @@ ar2qspec<-function(fit,freq=NULL) {
 
 
 
-#' Autoregression (AR) Model of Quantile Series
-#'
-#' This function fits an autoregression (AR) model to quantile series (QSER) separately for each quantile level using \code{stats::ar()}.
-#' @param y.qser matrix or array of pre-calculated QSER, e.g., using \code{qser()}
-#' @param p order of AR model (default = \code{NULL}: selected by AIC)
-#' @param order.max maximum order for AIC if \code{p = NULL} (default = \code{NULL}: determined by \code{stats::ar()})
-#' @return a list with the following elements:
-#'   \item{A}{matrix or array of AR coefficients}
-#'   \item{V}{vector or matrix of residual covariance}
-#'   \item{p}{order of AR model}
-#'   \item{n}{length of time series}
-#'   \item{residuals}{matrix or array of residuals}
-#' @import 'stats'
-#' @export
-qser2ar <- function(y.qser,p=NULL,order.max=NULL) {
-  if(is.matrix(y.qser)) y.qser <- array(y.qser,dim=c(1,dim(y.qser)))
-  nc <- dim(y.qser)[1]
-  n <- dim(y.qser)[2]
-  ntau <- dim(y.qser)[3]
-  # order selection by aic
-  if(is.null(p)) {
-    aic <- NULL
-    for(ell in c(1:ntau)) {
-      mu <- apply(matrix(y.qser[,,ell],nrow=nc),1,mean)
-      aic <- cbind(aic,stats::ar(t(matrix(y.qser[,,ell]-mu,nrow=nc)),order.max=order.max,method=c("yule-walker"))$aic)
-    }
-    aic <- apply(aic,1,mean)
-    # optimal order minimizes aic
-    p <- as.numeric(which.min(aic)) - 1
-  }
-  # p = 0
-  if(p == 0) {
-     A <- NULL	
-     V <- array(0,dim=c(nc,nc,ntau))
-     resid <- array(0,dim=c(nc,n,ntau))
-     for(ell in c(1:ntau)) {
-       mu <- apply(matrix(y.qser[,,ell],nrow=nc),1,mean)
-       V[,,ell] <- matrix(tcrossprod(matrix(y.qser[,,ell]-mu,nrow=nc)),ncol=nc)/n
-       resid[,,ell] <- matrix(y.qser[,,ell]-mu,nrow=nc)
-     }
-     if(nc==1) {
-       V <- V[1,1,]
-       resid <- resid[1,,]
-     }
-     return(list(A=A,V=V,p=p,n=n,residuals=y.qser))
-  } 
-  # p > 0
-  V <- array(0,dim=c(nc,nc,ntau))
-  A <- array(0,dim=c(nc,nc,p,ntau))
-  resid <- array(0,dim=c(nc,n-p,ntau))
-  for(ell in c(1:ntau)) {
-    mu <- apply(matrix(y.qser[,,ell],nrow=nc),1,mean)
-    fit <- stats::ar(t(matrix(y.qser[,,ell]-mu,nrow=nc)), aic=FALSE, order.max = p, method=c("yule-walker"))
-    if(nc==1) {
-      V[,,ell] <- sum(fit$resid[-c(1:p)]^2)/n
-      for(j in c(1:p)) A[,,j,ell] <- fit$ar[j]	
-      resid[,,ell] <- t(fit$resid[-c(1:p)])
-    } else {
-      V[,,ell] <- matrix(crossprod(fit$resid[-c(1:p),]),ncol=nc)/n
-      for(j in c(1:p)) A[,,j,ell] <- fit$ar[j,,]
-      resid[,,ell] <- t(fit$resid[-c(1:p),])	  
-    }	
-  }
-  if(nc==1) {
-    V <- V[1,1,]
-    A <- matrix(A[1,1,,],nrow=p)
-    resid <- resid[1,,]
-  }
-  return(list(A=A,V=V,p=p,n=n,residuals=resid))
-}
-
-
-#' Autoregression (AR) Estimator of Quantile Spectrum
-#'
-#' This function computes autoregression (AR) estimate of quantile spectrum/cross-spectrum from time series or quantile series (QSER).
-#' @param y vector or matrix of time series (if matrix, \code{nrow(y)} = length of time series)
-#' @param tau sequence of quantile levels in (0,1)
-#' @param y.qser matrix or array of pre-calculated QSER (default = \code{NULL}: compute from \code{y} and \code{tau});
-#' if \code{y.qser} is supplied, \code{y} and \code{tau} can be left unspecified
-#' @param p order of AR model (default = \code{NULL}: automatically selected by AIC)
-#' @param order.max maximum order for AIC if \code{p = NULL} (default = \code{NULL}: determined by \code{stats::ar()})
-#' @param freq sequence of frequencies in [0,1) (default = \code{NULL}: all Fourier frequencies)
-#' @param n.cores number of cores for parallel computing of QDFT if \code{y.qser = NULL} (default = 1)
-#' @param cl pre-existing cluster for repeated parallel computing of QDFT (default = \code{NULL})
-#' @return a list with the following elements:
-#'   \item{spec}{matrix or array of AR quantile spectrum/cross-spectrum}
-#'   \item{freq}{sequence of frequencies}
-#'   \item{fit}{object of AR model}
-#'   \item{qser}{matrix or array of quantile series if \code{y.qser = NULL}}
-#' @import 'stats'
-#' @export
-#' @examples
-#' y1 <- stats::arima.sim(list(order=c(1,0,0), ar=0.5), n=64)
-#' y2 <- stats::arima.sim(list(order=c(1,0,0), ar=-0.5), n=64)
-#' tau <- seq(0.1,0.9,0.05)
-#' n <- length(y1)
-#' ff <- c(0:(n-1))/n
-#' sel.f <- which(ff > 0 & ff < 0.5)
-#' y.ar <- qspec.ar(cbind(y1,y2),tau,p=1)
-#' qfa.plot(ff[sel.f],tau,Re(y.ar$spec[1,1,sel.f,]))
-qspec.ar <- function(y,tau,y.qser=NULL,p=NULL,order.max=NULL,freq=NULL,n.cores=1,cl=NULL) {
-  return.qser <- FALSE
-  if(is.null(y.qser)) {
-    y.qser <- qser(y,tau,n.cores=n.cores,cl=cl)
-	return.qser <- TRUE
-  }
-  fit <- qser2ar(y.qser,p=p,order.max=order.max)
-  tmp <- ar2qspec(fit,freq)
-  if(return.qser) {
-    return(list(spec=tmp$spec,freq=tmp$freq,fit=fit,qser=y.qser)) 
-  } else {
-    return(list(spec=tmp$spec,freq=tmp$freq,fit=fit))
-  }
-}
-  
-
-
 #' Spline Autoregression (SAR) Model of Quantile Series
 #'
 #' This function fits spline autoregression (SAR) model to quantile series (QSER).
@@ -1524,7 +974,7 @@ qspec.ar <- function(y,tau,y.qser=NULL,p=NULL,order.max=NULL,freq=NULL,n.cores=1
 #' @import 'stats'
 #' @import 'splines'
 #' @export
-qser2sar <- function(y.qser,tau,d=1,p=NULL,order.max=NULL,spar=NULL,method=c("AIC","BIC","GCV"),weighted=FALSE) {
+qser2sar <- function(y.qser,tau,d=1,p=NULL,order.max=NULL,spar=NULL,method=c("GCV","AIC","BIC"),weighted=FALSE) {
 
   create_coarse_grid <- function(tau,d=1) {
   # create index of a coarse quantile grid for SQR
@@ -1566,7 +1016,7 @@ qser2sar <- function(y.qser,tau,d=1,p=NULL,order.max=NULL,spar=NULL,method=c("AI
 	r
   }
 
-  sar_obj <- function(spar,Z2,D2,YZ,Y,Z,r,nc,L,n,p,method=c("AIC","BIC","GCV"),return.solution=FALSE) {
+  sar_obj <- function(spar,Z2,D2,YZ,Y,Z,r,nc,L,n,p,method=c("GCV","AIC","BIC"),return.solution=FALSE) {
   # this function computes the criterion for penalty parameter selection in SAR using spar
   # with the option of returning the details of fit
     lam <- r * 256^(3*spar-1)
@@ -1590,9 +1040,6 @@ qser2sar <- function(y.qser,tau,d=1,p=NULL,order.max=NULL,spar=NULL,method=c("AI
     }
     # compute parameter selection criterion
     crit <- 0
-    if(method[1]=="GCV") {
-      crit <- (rss/(L*(n-p))) / (1-df/(L*(n-p)))^2
-    }
     if(method[1]=="AIC") {
       for(l in c(1:L)) {
         if(nc==1) {
@@ -1612,6 +1059,9 @@ qser2sar <- function(y.qser,tau,d=1,p=NULL,order.max=NULL,spar=NULL,method=c("AI
         }
       }
       crit <- n*crit + log(n)*df
+    }
+	if(method[1]=="GCV") {
+      crit <- (rss/(L*(n-p))) / (1-df/(L*(n-p)))^2
     }
     if(return.solution) {
       return(list(crit=crit,Theta=Theta,V0=V0,lam=lam,df=df,method=method[1]))
@@ -1778,7 +1228,7 @@ qser2sar <- function(y.qser,tau,d=1,p=NULL,order.max=NULL,spar=NULL,method=c("AI
 
 #' Spline Autoregression (SAR) Estimator of Quantile Spectrum
 #'
-#' This function computes spline autoregression (SAR) estimate of quantile spectrum/cross-spectrum.
+#' This function computes spline autoregression (SAR) estimate of quantile spectrum.
 #' @param y vector or matrix of time series (if matrix, \code{nrow(y)} = length of time series)
 #' @param y.qser matrix or array of pre-calculated QSER (default = \code{NULL}: compute from \code{y} and \code{tau});
 #' if \code{y.qser} is supplied, \code{y} can be left unspecified
@@ -1787,7 +1237,7 @@ qser2sar <- function(y.qser,tau,d=1,p=NULL,order.max=NULL,spar=NULL,method=c("AI
 #' @param p order of SAR model (default = \code{NULL}: automatically selected by AIC)
 #' @param order.max maximum order for AIC if \code{p = NULL} (default = \code{NULL}: determined by \code{stats::ar()})
 #' @param spar penalty parameter alla \code{smooth.spline} (default = \code{NULL}: automatically selected)
-#' @param method criterion for penalty parameter selection:  \code{"AIC"} (default), \code{"BIC"}, or \code{"GCV"}
+#' @param method criterion for penalty parameter selection: \code{"GCV"}, \code{"AIC"} (default), or \code{"BIC"}
 #' @param weighted if \code{TRUE}, penalty function is weighted (default = \code{FALSE})
 #' @param freq sequence of frequencies in [0,1) (default = \code{NULL}: all Fourier frequencies)
 #' @param n.cores number of cores for parallel computing of QDFT if \code{y.qser = NULL} (default = 1)
@@ -1814,7 +1264,7 @@ qser2sar <- function(y.qser,tau,d=1,p=NULL,order.max=NULL,spar=NULL,method=c("AI
 #' y.qser <- qser(cbind(y1,y2),tau)
 #' y.sar <- qspec.sar(y.qser=y.qser,tau=tau,p=1)
 #' qfa.plot(ff[sel.f],tau,Re(y.sar$spec[1,1,sel.f,]))
-qspec.sar <- function(y,y.qser=NULL,tau,d=1,p=NULL,order.max=NULL,spar=NULL,method=c("AIC","BIC","GCV"),
+qspec.sar <- function(y,y.qser=NULL,tau,d=1,p=NULL,order.max=NULL,spar=NULL,method=c("GCV","AIC","BIC"),
 weighted=FALSE,freq=NULL,n.cores=1,cl=NULL) {
   return.qser <- FALSE
   if(is.null(y.qser)) { 
@@ -1822,7 +1272,7 @@ weighted=FALSE,freq=NULL,n.cores=1,cl=NULL) {
     return.qser <- TRUE
   }
   fit <- qser2sar(y.qser,tau=tau,d=d,p=p,order.max=order.max,spar=spar,method=method[1],weighted=weighted)
-  tmp <- ar2qspec(fit,freq)
+  tmp <- ar2qspec(fit)
   if(return.qser) {
     return(list(spec=tmp$spec,freq=tmp$freq,fit=fit,qser=y.qser)) 
   } else {
@@ -2152,7 +1602,7 @@ sar.gc.bootstrap <- function(y.qser,fit,index=c(1,2),nsim=1000,method=c("ar","sa
 }
 
 
-#' Wald Test and Confidence Band for SAR-Based Granger-Causality Analysis
+#' Wald Test and Confidence Band for Granger-Causality Analysis
 #'
 #' This function computes Wald test and confidence band for Granger-causality 
 #' using bootstrap samples generated by \code{sar.gc.bootstrap()} 
@@ -2396,7 +1846,7 @@ sar.eq.bootstrap <- function(y.qser,fit,fit2,index=c(1,2),nsim=1000,method=c("ar
 
   
 
-#' Wald Test and Confidence Band for Equality of SAR-Based Granger-Causality in Two Samples
+#' Wald Test and Confidence Band for Equality of Granger-Causality in Two Samples
 #'
 #' This function computes Wald test and confidence band for equality of Granger-causality in two samples
 #' using bootstrap samples generated by \code{sar.eq.bootstrap()} based on the spline autoregression (SAR) models
@@ -2478,4 +1928,366 @@ sar.eq.test <- function(A1,A1.sim,A2,A2.sim,sel.lag=NULL,sel.tau=NULL) {
   return(list(test=test,D.u=D.u,D.l=D.l))
 }
 
+
+# -- new functions in version 3.0  (October 2024)
+
+
+#' Periodogram (PER)
+#'
+#' This function computes the periodogram or periodogram matrix for univariate or multivariate time series.
+#' @param y vector (n) or matrix (n x nc) of time series
+#' @return A vector (n) or array (nc x nc x n) of periodogram
+#' @export
+#' @examples
+#' y <- stats::arima.sim(list(order=c(1,0,0), ar=0.5), n=64)
+#' y.per <- per(y)
+#' plot(y.per)
+per <- function(y) {
+  if(!is.matrix(y)) y <- matrix(y,ncol=1,nrow=length(y))
+  nc <- ncol(y)
+  n <- nrow(y)
+  y.dft <- matrix(0,nrow=n,ncol=nc)
+  for(k in c(1:nc)) {
+    y.dft[,k] <- fft(y[,k])
+  }  
+  y.per <- array(0,dim=c(nc,nc,n))
+  for(k in c(1:nc)) {
+    for(kk in c(k:nc)) {
+	  y.per[k,kk,] <- y.dft[,k] * Conj(y.dft[,kk]) / n
+      if(k != kk) y.per[kk,k,] = y.per[k,kk,]
+	}
+  }
+  if(nc == 1) y.per <- Re(y.per[1,1,])
+  return(y.per)
+}
+
+
+#' Quantile-Crossing Series (QCSER)
+#'
+#' This function creates the quantile-crossing series (QCSER) for univariate or multivariate time series.
+#' @param y vector or matrix of time series
+#' @param tau vector of quantile levels in (0,1)
+#' @param normalize \code{TRUE} or \code{FALSE} (default): normalize QCSER to have unit variance
+#' @return A matrix or array of quantile-crossing series
+#' @export
+#' @examples
+#' y <- stats::arima.sim(list(order=c(1,0,0), ar=0.5), n=64)
+#' tau <- seq(0.1,0.9,0.05)
+#' y.qser <- qcser(y,tau)
+#' dim(y.qser)
+qcser <- function(y,tau,normalize=FALSE) {
+  if(!is.matrix(y)) y <- matrix(y,ncol=1,nrow=length(y))
+  n <- nrow(y)
+  nc <- ncol(y)
+  nq <- length(tau)
+  y.qcser <- array(0,dim=c(nc,n,nq))
+  for(k in c(1:nc)) {
+    q <- quantile(y[,k],tau)
+    for(j in c(1:nq)) {
+	  y.qcser[k,,j] <- 0
+	  y.qcser[k,which(y[,k] <= q[j]),j] <- 1
+	  y.qcser[k,,j] <- tau[j] - y.qcser[k,,j]
+	  if(normalize) y.qcser[k,,j] <- y.qcser[k,,j] / sqrt(tau[j]*(1-tau[j]))
+	}
+  }
+  if(nc==1) y.qcser <- matrix(y.qcser,ncol=nq)
+  return(y.qcser)
+}
+
+
+#' ACF of Quantile Series (QSER) or Quantile-Crossing Series (QCACF)
+#'
+#' This function creates the ACF of quantile series or quantile-crossing series
+#' @param y.qser matrix or array of quantile-crossing series
+#' @return A matrix or array of ACF
+#' @export
+#' @examples
+#' y <- stats::arima.sim(list(order=c(1,0,0), ar=0.5), n=64)
+#' tau <- seq(0.1,0.9,0.05)
+#' y.qser <- qcser(y,tau)
+#' y.qacf <- qser2qacf(y.qser)
+#' dim(y.qacf)
+qser2qacf <- function(y.qser) {
+  if(is.matrix(y.qser)) y.qser <- array(y.qser,dim=c(1,nrow(y.qser),ncol(y.qser)))
+  nc <- dim(y.qser)[1]
+  n <- dim(y.qser)[2]
+  nq <- dim(y.qser)[3]
+  y.qacf <- array(0,dim=c(nc,nc,n,nq))
+  if(nc > 1) {
+    for(j in c(1:nq)) {
+      tmp <- stats::acf(t(as.matrix(y.qser[,,j],ncol=nc)),
+	                    type="covariance",lag.max=n-1,plot=FALSE,demean=TRUE)$acf
+      for(k in c(1:nc)) {
+        for(kk in c(1:nc)) {
+          y.qacf[k,kk,,j] <- tmp[,k,kk] 
+	    }
+      }
+    }
+    rm(tmp)
+  } else {
+    for(j in c(1:nq)) {
+      tmp <- stats::acf(c(y.qser[,,j]),
+	                    type="covariance",lag.max=n-1,plot=FALSE,demean=TRUE)$acf 
+      y.qacf[1,1,,j] <- tmp[,1,1]
+    }	 
+  }
+  if(nc==1) y.qacf <- matrix(y.qacf[1,1,,],ncol=nq)
+  return(y.qacf)
+}
+
+
+# Smoothing of AR Residual Covariance Matrix Across Quantiles
+#
+# This function perfoms quantile smoothing of Residual Covariance matrix
+# @param V array of functional residual covariance to be smoothed
+# @param method quantile smoothing method: \code{"gamm"}, \code{"sp"}, or \code{"none"} (default)
+Vsmooth <- function(V,method=c("none","gamm","sp")) {
+    nc <- dim(V)[1]
+	ntau <- dim(V)[3]
+	type <- 1
+    if(method[1] %in% c("gamm","sp")) {
+  	  if(nc == 1) {
+	    V[1,1,] <- qsmooth(V[1,1,],method=method[1])
+	  } else {
+	    if(type[1]==2) {
+  	      U <- V
+	      for(ell in c(1:ntau)) {
+	        tmp <- svd(V[,,ell])
+		    U[,,ell] <- tmp$u %*% diag(sqrt(tmp$d))
+          }
+          for(k in c(1:nc)) {
+	        for(kk in c(1:nc)) {   
+	          U[k,kk,] <- qsmooth(U[k,kk,],method=method[1])
+	        }
+	      }
+	      for(ell in c(1:ntau)) {
+		    V[,,ell] <- U[,,ell] %*% t(U[,,ell])
+          }
+	    } else {
+          for(k in c(1:nc)) {
+	        for(kk in c(k:nc)) {   
+	          V[k,kk,] <- qsmooth(V[k,kk,],method=method[1])
+		      V[kk,k,] <- V[k,kk,]
+	        }
+	      }	   
+	    }
+	  }
+    }
+    return(V)
+}	
+
+
+# Smoothing of AR Coefficient Matrix Across Quantiles
+#
+# This function perfoms quantile smoothing of AR Coefficients
+# @param A array of functional AR coefficients to be smoothed
+# @param method quantile smoothing method: \code{"gamm"}, \code{"sp"}, or \code{"none"} (default)
+Asmooth <- function(A,method=c("none","gamm","sp")) {
+    nc <- dim(A)[1]
+    p <- dim(A)[3]
+    if(method[1] %in% c("gamm","sp")) {
+      for(k in c(1:nc)) {
+	    for(kk in c(1:nc)) {
+	      for(j in c(1:p)) {
+	        A[k,kk,j,] <- qsmooth(A[k,kk,j,],method=method[1])
+	      }
+        }
+	  }
+    }
+    return(A)
+}
+
+
+
+#' Autoregression (AR) Model of Quantile Series
+#'
+#' This function fits an autoregression (AR) model to quantile series (QSER) separately for each quantile level using \code{stats::ar()}.
+#' @param y.qser matrix or array of pre-calculated QSER, e.g., using \code{qser()}
+#' @param p order of AR model (default = \code{NULL}: selected by AIC)
+#' @param order.max maximum order for AIC if \code{p = NULL} (default = \code{NULL}: determined by \code{stats::ar()})
+#' @param method quantile smoothing method: \code{"gamm"}, \code{"sp"}, or \code{"NA"} (default)
+#' @return a list with the following elements:
+#'   \item{A}{matrix or array of AR coefficients}
+#'   \item{V}{vector or matrix of residual covariance}
+#'   \item{p}{order of AR model}
+#'   \item{n}{length of time series}
+#'   \item{residuals}{matrix or array of residuals}
+#' @import 'stats'
+#' @import 'mgcv'
+#' @export
+qser2ar <- function(y.qser,p=NULL,order.max=NULL,method=c("none","gamm","sp")) {
+  if(is.matrix(y.qser)) y.qser <- array(y.qser,dim=c(1,dim(y.qser)))
+  nc <- dim(y.qser)[1]
+  n <- dim(y.qser)[2]
+  ntau <- dim(y.qser)[3]
+  # order selection by aic
+  if(is.null(p)) {
+    aic <- NULL
+    for(ell in c(1:ntau)) {
+      mu <- apply(matrix(y.qser[,,ell],nrow=nc),1,mean)
+      aic <- cbind(aic,stats::ar(t(matrix(y.qser[,,ell]-mu,nrow=nc)),order.max=order.max,method=c("yule-walker"))$aic)
+    }
+    aic <- apply(aic,1,mean)
+    # optimal order minimizes aic
+    p <- as.numeric(which.min(aic)) - 1
+  }
+  # p = 0
+  if(p == 0) {
+     A <- NULL	
+     V <- array(0,dim=c(nc,nc,ntau))
+     resid <- array(0,dim=c(nc,n,ntau))
+     for(ell in c(1:ntau)) {
+       mu <- apply(matrix(y.qser[,,ell],nrow=nc),1,mean)
+       V[,,ell] <- matrix(tcrossprod(matrix(y.qser[,,ell]-mu,nrow=nc)),ncol=nc)/n
+       resid[,,ell] <- matrix(y.qser[,,ell]-mu,nrow=nc)
+     }
+     V <- Vsmooth(V,method[1])	 
+     if(nc==1) {
+       V <- V[1,1,]
+       resid <- resid[1,,]
+     }
+     return(list(A=A,V=V,p=p,n=n,residuals=y.qser))
+  }
+  # p > 0
+  V <- array(0,dim=c(nc,nc,ntau))
+  A <- array(0,dim=c(nc,nc,p,ntau))
+  resid <- array(0,dim=c(nc,n-p,ntau))
+  for(ell in c(1:ntau)) {
+    mu <- apply(matrix(y.qser[,,ell],nrow=nc),1,mean)
+    fit <- stats::ar(t(matrix(y.qser[,,ell]-mu,nrow=nc)), aic=FALSE, order.max = p, method=c("yule-walker"))
+    if(nc==1) {
+      V[,,ell] <- sum(fit$resid[-c(1:p)]^2)/n
+      for(j in c(1:p)) A[,,j,ell] <- fit$ar[j]	
+      resid[,,ell] <- t(fit$resid[-c(1:p)])
+    } else {
+      V[,,ell] <- matrix(crossprod(fit$resid[-c(1:p),]),ncol=nc)/n
+      for(j in c(1:p)) A[,,j,ell] <- fit$ar[j,,]
+      resid[,,ell] <- t(fit$resid[-c(1:p),])	  
+    }	
+  }
+  A <- Asmooth(A,method[1])
+  V <- Vsmooth(V,method[1])
+  if(nc==1) {
+    V <- V[1,1,]
+    A <- matrix(A[1,1,,],nrow=p)
+    resid <- resid[1,,]
+  }
+  return(list(A=A,V=V,p=p,n=n,residuals=resid))
+}
+
+
+#' Autoregression (AR) Estimator of Quantile Spectrum
+#'
+#' This function computes autoregression (AR) estimate of quantile spectrum from time series or quantile series (QSER).
+#' @param y vector or matrix of time series (if matrix, \code{nrow(y)} = length of time series)
+#' @param tau sequence of quantile levels in (0,1)
+#' @param y.qser matrix or array of pre-calculated QSER (default = \code{NULL}: compute from \code{y} and \code{tau});
+#' @param method quantile smoothing method: \code{"gamm"} for \code{mgcv::gamm()}, 
+#' \code{"sp"} for \code{stats::smooth.spline()}, or \code{"none"} (default)
+#' if \code{y.qser} is supplied, \code{y} and \code{tau} can be left unspecified
+#' @param p order of AR model (default = \code{NULL}: automatically selected by AIC)
+#' @param order.max maximum order for AIC if \code{p = NULL} (default = \code{NULL}: determined by \code{stats::ar()})
+#' @param freq sequence of frequencies in [0,1) (default = \code{NULL}: all Fourier frequencies)
+#' @param n.cores number of cores for parallel computing of QDFT if \code{y.qser = NULL} (default = 1)
+#' @param cl pre-existing cluster for repeated parallel computing of QDFT (default = \code{NULL})
+#' @return a list with the following elements:
+#'   \item{spec}{matrix or array of AR quantile spectrum}
+#'   \item{freq}{sequence of frequencies}
+#'   \item{fit}{object of AR model}
+#'   \item{qser}{matrix or array of quantile series if \code{y.qser = NULL}}
+#' @import 'stats'
+#' @import 'mgcv'
+#' @export
+#' @examples
+#' y1 <- stats::arima.sim(list(order=c(1,0,0), ar=0.5), n=64)
+#' y2 <- stats::arima.sim(list(order=c(1,0,0), ar=-0.5), n=64)
+#' y <- cbind(y1,y2)
+#' tau <- seq(0.1,0.9,0.05)
+#' n <- length(y1)
+#' ff <- c(0:(n-1))/n
+#' sel.f <- which(ff > 0 & ff < 0.5)
+#' y.qspec.ar <- qspec.ar(y,tau,p=1)$spec
+#' qfa.plot(ff[sel.f],tau,Re(y.qspec.ar[1,1,sel.f,]))
+#' y.qser <- qcser(y1,tau)
+#' y.qspec.ar <- qspec.ar(y.qser=y.qser,p=1)$spec
+#' qfa.plot(ff[sel.f],tau,Re(y.qspec.ar[sel.f,]))
+#' y.qspec.arqs <- qspec.ar(y.qser=y.qser,p=1,method="sp")$spec
+#' qfa.plot(ff[sel.f],tau,Re(y.qspec.arqs[sel.f,]))
+qspec.ar <- function(y,tau,y.qser=NULL,p=NULL,order.max=NULL,freq=NULL,
+                method=c("none","gamm","sp"),n.cores=1,cl=NULL) {
+  return.qser <- FALSE
+  if(is.null(y.qser)) {
+    y.qser <- qser(y,tau,n.cores=n.cores,cl=cl)
+	return.qser <- TRUE
+  }
+  fit <- qser2ar(y.qser,p=p,order.max=order.max,method=method[1])
+  tmp <- ar2qspec(fit,freq)
+  if(return.qser) {
+    return(list(spec=tmp$spec,freq=tmp$freq,fit=fit,qser=y.qser)) 
+  } else {
+    return(list(spec=tmp$spec,freq=tmp$freq,fit=fit))
+  }
+}
+
+
+
+# version 3.1: rename qspec.lw as qacf2speclw
+# and absort it into LWQS to become the new qspec.lw  (December 2024)
+
+#' Lag-Window (LW) Estimator of Quantile Spectrum
+#'
+#' This function computes lag-window (LW) estimate of quantile spectrum
+#' with or without quantile smoothing from time series or quantile autocovariance function (QACF).
+#' @param y vector or matrix of time series (if matrix, \code{nrow(y)} = length of time series)
+#' @param tau sequence of quantile levels in (0,1)
+#' @param y.qacf matrix or array of pre-calculated QACF (default = \code{NULL}: compute from \code{y} and \code{tau});
+#' if \code{y.qacf} is supplied, \code{y} and \code{tau} can be left unspecified
+#' @param M bandwidth parameter of lag window (default = \code{NULL}: quantile periodogram)
+#' @param method quantile smoothing method:  \code{"gamm"} for \code{mgcv::gamm()}, 
+#' \code{"sp"} for \code{stats::smooth.spline()}, or \code{"none"} (default)
+#' @param spar smoothing parameter in \code{smooth.spline()} if \code{method = "sp"} (default = \code{"GCV"})
+#' @param n.cores number of cores for parallel computing (default = 1)
+#' @param cl pre-existing cluster for repeated parallel computing (default = \code{NULL})
+#' @return A list with the following elements:
+#'   \item{spec}{matrix or array of spectral estimate}
+#'   \item{spec.lw}{matrix or array of spectral estimate without quantile smoothing}
+#'   \item{lw}{lag-window sequence}
+#'   \item{qacf}{matrix or array of quantile autocovariance function if \code{y.qacf = NULL}}
+#' @import 'stats'
+#' @import 'foreach'
+#' @import 'parallel'
+#' @import 'doParallel'
+#' @import 'mgcv'
+#' @import 'nlme'
+#' @export
+#' @examples
+#' y1 <- stats::arima.sim(list(order=c(1,0,0), ar=0.5), n=64)
+#' y2 <- stats::arima.sim(list(order=c(1,0,0), ar=-0.5), n=64)
+#' tau <- seq(0.1,0.9,0.05)
+#' n <- length(y1)
+#' ff <- c(0:(n-1))/n
+#' sel.f <- which(ff > 0 & ff < 0.5)
+#' y.qacf <- qacf(cbind(y1,y2),tau)
+#' y.qper.lw <- qspec.lw(y.qacf=y.qacf,M=5)$spec
+#' qfa.plot(ff[sel.f],tau,Re(y.qper.lw[1,1,sel.f,]))
+#' y.qper.lwqs <- qspec.lw(y.qacf=y.qacf,M=5,method="sp",spar=0.9)$spec
+#' qfa.plot(ff[sel.f],tau,Re(y.qper.lwqs[1,1,sel.f,]))
+qspec.lw <- function(y,tau,y.qacf=NULL,M=NULL,method=c("none","gamm","sp"),spar="GCV",n.cores=1,cl=NULL) {
+  return.qacf <- FALSE
+  if(is.null(y.qacf)) {
+    y.qacf <- qacf(y,tau,n.cores=n.cores,cl=cl)
+	return.qacf <- TRUE
+  }
+  y.lw <- qacf2speclw(y.qacf,M)
+  if(method[1] %in% c("sp","gamm")) {
+    y.qper.lwqs <- qsmooth.qper(y.lw$spec,method=method[1],spar=spar,n.cores=n.cores,cl=cl)
+  } else {
+    y.qper.lwqs <- y.lw$spec
+  }
+  if(return.qacf) {
+    return(list(spec=y.qper.lwqs,spec.lw=y.lw$spec,lw=y.lw$lw,qacf=y.qacf))
+  } else {
+    return(list(spec=y.qper.lwqs,spec.lw=y.lw$spec,lw=y.lw$lw))
+  }  
+}
 
