@@ -678,143 +678,6 @@ rq.fit.fnb2 <- function(x, y, zeta0, rhs, beta=0.99995,eps=1e-06) {
 
 
 
-#' Spline Quantile Regression (SQR)
-#'
-#' This function computes spline quantile regression (SQR) solution from response vector and design matrix.
-#' It uses the FORTRAN code \code{rqfnb.f} in the "quantreg" package with the kind permission of Dr. R. Koenker.
-#' @param y response vector
-#' @param X design matrix (\code{nrow(X) = length(y)})
-#' @param tau sequence of quantile levels in (0,1)
-#' @param c0 penalty parameter
-#' @param d subsampling rate of quantile levels (default = 1)
-#' @param weighted if \code{TRUE}, penalty function is weighted (default = \code{FALSE})
-#' @param mthreads if \code{TRUE}, multithread BLAS is enabled when available (default = \code{FALSE}, required for parallel computing) 
-#' @return A list with the following elements:
-#'   \item{coefficients}{matrix of regression coefficients}
-#'   \item{nit}{number of iterations}
-#' @import 'stats'
-#' @import 'splines'
-#' @import 'RhpcBLASctl'
-#' @export
-sqr.fit <- function(y,X,tau,c0,d=1,weighted=FALSE,mthreads=FALSE) {  
-
-  create_coarse_grid <- function(tau,d=1) {
-  # create index of a coarse quantile grid for SQR
-    ntau <- length(tau)
-    sel.tau0 <- seq(1,ntau,d)
-    if(sel.tau0[length(sel.tau0)] < ntau) sel.tau0 <- c(sel.tau0,ntau)
-    sel.tau0
-  }
-
-  create_weights <- function(tau) {
-  # quantile-dependent weights of second derivatives in SQR penalty
-    0.25 / (tau*(1-tau))
-  }
-
-  create_spline_matrix <- function(tau0,tau) {
-  # create spline matrix and its second derivative for SQR
-  # input:    tau0 = subset of tau
-  #            tau = complete set of quantiles for interpolation
-  # output: bsMat  = matrix of basis functions
-  #         dbsMat = matrix of second derivatives
-  #         bsMat2 = maxtrix of basis function for interpolation to tau
-  # imports: 'splines'
-    knots <- stats::smooth.spline(tau0,tau0)$fit$knot 
-    # rescale tau0 and tau to [0,1] for spline matrix to be consistent with smooth.spline
-    bsMat <- splines::splineDesign(knots,(tau0-min(tau0))/(max(tau0)-min(tau0)))
-    dbsMat <- splines::splineDesign(knots,(tau0-min(tau0))/(max(tau0)-min(tau0)),derivs=2)
-    bsMat2 <- splines::splineDesign(knots,(tau-min(tau))/(max(tau)-min(tau)))
-    return(list(bsMat=bsMat,dbsMat=dbsMat,bsMat2=bsMat2,knots=knots))
-  }
-
-  rescale_penalty <- function(c0,n,tau0,dbsMat,weighted=FALSE) {
-  # rescale penalty par by weights and weighted l1 norm of dbsMat
-  # input:   c0 = user-specified penalty parameter
-  #           n = number of observations
-  #        tau0 = L vector of quantile levels
-  #      dbsMat = L*K spline matrix of second derivativies
-  #    weighted = TRUE if penalty is weighted
-  # dependencies: create_weights()
-    L <- length(tau0)
-    if(weighted) {
-      w <- create_weights(tau0)
-    } else {
-      w <- rep(1,L)  
-    }
-    c2 <- c0 * w / sum(abs(w * dbsMat))
-    c2 <- c2 * n * L
-    c2
-  }
-
-  create_Phi_matrix <- function(bsVec,p) {
-  # create spline basis matrix for LP and dual LP
-  # input: bsVec = K-vector of bs functions (K=number of basis functions)
-  #            p = number of parameters
-  # output:  Phi = p*pK matrix of basis functions
-    K <- length(bsVec)
-    Phi <- matrix(0,nrow=p,ncol=p*K)
-    for(i in c(1:p)) Phi[i,((i-1)*K+1):(i*K)] <- bsVec
-    Phi
-  }
-  
-  # turn-off blas multithread to run in parallel
-  if(!mthreads) {
-    RhpcBLASctl::blas_set_num_threads(1)
-  }
-  n <- length(y)
-  ntau <-length(tau)
-  p <- ncol(X)
-  # create a coarse quantile grid for LP
-  sel.tau0 <- create_coarse_grid(tau,d)
-  tau0 <- tau[sel.tau0]
-  L <- length(tau0)
-  # create spline design matrix with knots provided by smooth.spline
-  sdm <- create_spline_matrix(tau0,tau)
-  K <- ncol(sdm$bsMat)
-  # rescale penalty parameter
-  c2 <- rescale_penalty(c0,n,tau0,sdm$dbsMat,weighted)
-  # set up the observation vector in dual LP
-  y2 <- c(rep(y,L),rep(0,p*L))
-  # set up the design matrix and rhs vector in dual LP
-  X2 <- matrix(0, nrow=(n+p)*L,ncol=p*K)
-  rhs <- rep(0,p*K)
-  for(ell in c(1:L)) {
-    alpha <- tau0[ell]
-    cc <- c2[ell]
-    # design matrix for spline coefficients
-    X0 <- create_Phi_matrix(sdm$bsMat[ell,],p)
-    X0 <- X %*% X0
-    sel <- ((ell-1)*n+1):(ell*n)
-    X2[sel,] <- X0
-    # design matrix (already weighted) for penalty function 
-    Z0 <- create_Phi_matrix(sdm$dbsMat[ell,],p)
-    # constraint matrix
-    sel <- (((ell-1)*p+1):(ell*p))+n*L
-    X2[sel,] <- 2 * cc * Z0
-    rhs <- rhs + (1-alpha) * apply(X0,2,sum) + cc * apply(Z0,2,sum)
-  }
-  rm(X0,Z0,sel)
-  # default initial value of n*L+p*L dual variables
-  zeta0 <- c( rep(1-tau0,each=n), rep(0.5, p*L) )
-  # compute the primal-dual LP solution
-  fit <- rq.fit.fnb2(x=X2, y=y2, zeta0=zeta0, rhs = rhs)
-  theta <- fit$coefficients[c(1:(p*K))]
-  zeta <- fit$dualvars
-  nit <- fit$nit
-  # clean up
-  rm(X2,y2,zeta0,rhs,fit)
-  # map to interpolated regression solution
-  theta <- matrix(theta,ncol=1)
-  beta <- matrix(0,nrow=p,ncol=ntau)
-  for(ell in c(1:ntau)) {
-    Phi <- create_Phi_matrix(sdm$bsMat2[ell,],p)
-    beta[,ell] <- Phi %*% theta
-  }
-  return(list(coefficients=beta,nit=nit))
-}
-
-
-
 
 # -- new functions in version 2.0 for SAR and AR estimators of quantile spectra (4/8/2023) --
 
@@ -1449,7 +1312,7 @@ sar.gc.coef <- function(fit,index=c(1,2)) {
 #' @param nsim number of bootstrap samples (default = 1000)
 #' @param method method of residual calculation: \code{"ar"} (default) or \code{"sar"}
 #' @param n.cores number of cores for parallel computing (default = 1)
-#' @param mthreads if \code{TRUE}, multithread BLAS is enabled when available (default = \code{FALSE}, required for parallel computing) 
+#' @param mthreads if \code{FALSE}, set \code{RhpcBLASctl::blas_set_num_threads(1)} (default = \code{TRUE})
 #' @param seed seed for random sampling (default = \code{1234567})
 #' @return array of simulated bootstrap samples of selected SAR coefficients
 #' @import 'foreach'
@@ -1463,7 +1326,7 @@ sar.gc.coef <- function(fit,index=c(1,2)) {
 #' tau <- seq(0.1,0.9,0.05)
 #' y.sar <- qspec.sar(cbind(y1,y2),tau=tau,p=1)
 #' A.sim <- sar.gc.bootstrap(y.sar$qser,y.sar$fit,index=c(1,2),nsim=5)
-sar.gc.bootstrap <- function(y.qser,fit,index=c(1,2),nsim=1000,method=c("ar","sar"),n.cores=1,mthreads=FALSE,seed=1234567) {
+sar.gc.bootstrap <- function(y.qser,fit,index=c(1,2),nsim=1000,method=c("ar","sar"),n.cores=1,mthreads=TRUE,seed=1234567) {
 
   simulate_qser_array <- function(resid,sample.idx,fit,idx0) {
   # this function simulates quantile series under H0 from bootstrap samples of residuals
@@ -1685,7 +1548,7 @@ sar.gc.test <- function(A,A.sim,sel.lag=NULL,sel.tau=NULL) {
 #' @param nsim number of bootstrap samples (default = 1000)
 #' @param method method of residual calculation: \code{"ar"} (default) or \code{"sar"}
 #' @param n.cores number of cores for parallel computing (default = 1)
-#' @param mthreads if \code{TRUE}, multithread BLAS is enabled when available (default = \code{FALSE}, required for parallel computing) 
+#' @param mthreads if \code{FALSE}, set \code{RhpcBLASctl::blas_set_num_threads(1)} (default = \code{TRUE}) 
 #' @param seed seed for random sampling (default = \code{1234567})
 #' @return array of simulated bootstrap samples of selected SAR coefficients
 #' @import 'foreach'
@@ -1703,7 +1566,7 @@ sar.gc.test <- function(A,A.sim,sel.lag=NULL,sel.tau=NULL) {
 #' y2.sar <- qspec.sar(cbind(y12,y22),tau=tau,p=1)
 #' A1.sim <- sar.eq.bootstrap(y1.sar$qser,y1.sar$fit,y2.sar$fit,index=c(1,2),nsim=5)
 #' A2.sim <- sar.eq.bootstrap(y2.sar$qser,y2.sar$fit,y1.sar$fit,index=c(1,2),nsim=5)
-sar.eq.bootstrap <- function(y.qser,fit,fit2,index=c(1,2),nsim=1000,method=c("ar","sar"),n.cores=1,mthreads=FALSE,seed=1234567) {
+sar.eq.bootstrap <- function(y.qser,fit,fit2,index=c(1,2),nsim=1000,method=c("ar","sar"),n.cores=1,mthreads=TRUE,seed=1234567) {
 
   simulate_qser_array_eq <- function(resid,sample.idx,fit,fit2,idx0) {
   # this function simulates quantile series under H0 from bootstrap samples of residuals
@@ -1935,8 +1798,9 @@ sar.eq.test <- function(A1,A1.sim,A2,A2.sim,sel.lag=NULL,sel.tau=NULL) {
 #' Periodogram (PER)
 #'
 #' This function computes the periodogram or periodogram matrix for univariate or multivariate time series.
-#' @param y vector (n) or matrix (n x nc) of time series
-#' @return A vector (n) or array (nc x nc x n) of periodogram
+#' @param y vector or matrix of time series s (if matrix, nrow(y) = length of time series)
+
+#' @return vector or array of periodogram
 #' @export
 #' @examples
 #' y <- stats::arima.sim(list(order=c(1,0,0), ar=0.5), n=64)
@@ -1966,7 +1830,7 @@ per <- function(y) {
 #'
 #' This function creates the quantile-crossing series (QCSER) for univariate or multivariate time series.
 #' @param y vector or matrix of time series
-#' @param tau vector of quantile levels in (0,1)
+#' @param tau sequence of quantile levels in (0,1)
 #' @param normalize \code{TRUE} or \code{FALSE} (default): normalize QCSER to have unit variance
 #' @return A matrix or array of quantile-crossing series
 #' @export
@@ -2290,4 +2154,1193 @@ qspec.lw <- function(y,tau,y.qacf=NULL,M=NULL,method=c("none","gamm","sp"),spar=
     return(list(spec=y.qper.lwqs,spec.lw=y.lw$spec,lw=y.lw$lw))
   }  
 }
+
+
+
+
+# version 4.0: modification of sqr.fit; add tsqr.fit, sqdft.fit, and sqdft
+
+
+#' Spline Quantile Regression (SQR)
+#'
+#' This function computes spline quantile regression (SQR) solution from response vector and design matrix.
+#' It uses the FORTRAN code \code{rqfnb.f} in the "quantreg" package with the kind permission of Dr. R. Koenker.
+#' @param X design matrix (\code{nrow(X) = length(y)})
+#' @param y response vector
+#' @param tau sequence of quantile levels in (0,1)
+#' @param spar smoothing parameter
+#' @param d subsampling rate of quantile levels (default = 1)
+#' @param weighted if \code{TRUE}, penalty function is weighted (default = \code{FALSE})
+#' @param mthreads if \code{FALSE}, set \code{RhpcBLASctl::blas_set_num_threads(1)} (default = \code{TRUE})
+#' @param ztol zero tolerance parameter used to determine the effective dimensionality of the fit
+#' @return A list with the following elements:
+#'   \item{coefficients}{matrix of regression coefficients}
+#'   \item{crit}{sequence critera for smoothing parameter select: (AIC,BIC,SIC)}
+#'   \item{np}{sequence of number of effective parameters}
+#'   \item{fid}{sequence of fidelity measure as quasi-likelihood}
+#'   \item{nit}{number of iterations}
+#' @import 'stats'
+#' @import 'splines'
+#' @import 'RhpcBLASctl'
+#' @export
+sqr.fit <- function(X,y,tau,spar=1,d=1,weighted=FALSE,mthreads=TRUE,ztol=1e-05) {  
+
+  create_coarse_grid <- function(tau,d=1) {
+  # create index of a coarse quantile grid for SQR
+    ntau <- length(tau)
+    sel.tau0 <- seq(1,ntau,d)
+    if(sel.tau0[length(sel.tau0)] < ntau) sel.tau0 <- c(sel.tau0,ntau)
+    sel.tau0
+  }
+
+  create_weights <- function(tau) {
+  # quantile-dependent weights of second derivatives in SQR penalty
+    0.25 / (tau*(1-tau))
+  }
+
+  create_spline_matrix <- function(tau0,tau) {
+  # create spline matrix and its second derivative for SQR
+  # input:    tau0 = subset of tau
+  #            tau = complete set of quantiles for interpolation
+  # output: bsMat  = matrix of basis functions
+  #         dbsMat = matrix of second derivatives
+  #         bsMat2 = maxtrix of basis function for interpolation to tau
+  # imports: 'splines'
+    knots <- stats::smooth.spline(tau0,tau0)$fit$knot 
+    # rescale tau0 and tau to [0,1] for spline matrix to be consistent with smooth.spline
+    bsMat <- splines::splineDesign(knots,(tau0-min(tau0))/(max(tau0)-min(tau0)))
+    dbsMat <- splines::splineDesign(knots,(tau0-min(tau0))/(max(tau0)-min(tau0)),derivs=2)
+    bsMat2 <- splines::splineDesign(knots,(tau-min(tau))/(max(tau)-min(tau)))
+    return(list(bsMat=bsMat,dbsMat=dbsMat,bsMat2=bsMat2,knots=knots))
+  }
+
+  rescale_penalty <- function(spar,n,tau0,X,sdm,weighted=FALSE) {
+  # rescale penalty par by weights and weighted l1 norm of dbsMat
+  # input: spar = user-specified penalty parameter
+  #           n = number of observations
+  #        tau0 = L sequence of quantile levels
+  #           X = design matrix
+  #         sdm = object from create_spline_matrix()
+  #    weighted = TRUE if penalty is weighted
+  # output:  c2 = n * c * w
+  # dependencies: create_weights(), create_Phi_matrix()
+    L <- length(tau0)
+	p <- ncol(X)
+	n <- nrow(X)
+    if(weighted) {
+      w <- create_weights(tau0)
+    } else {
+      w <- rep(1,L)  
+    }
+	r <- 0
+	for(ell in c(1:L)) {
+      # design matrix for spline coefficients
+      X0 <- create_Phi_matrix(sdm$bsMat[ell,],p)
+      X0 <- X %*% X0
+      r <- r + sum(abs(X0))
+    }
+	r <- r / sum(abs(w * sdm$dbsMat))
+    c2 <- w * r * 1000.0**(spar - 1.0)
+    c2
+  }
+
+  create_Phi_matrix <- function(bsVec,p) {
+  # create spline basis matrix for LP and dual LP
+  # input: bsVec = K-vector of bs functions (K=number of basis functions)
+  #            p = number of parameters
+  # output:  Phi = p*pK matrix of basis functions
+    K <- length(bsVec)
+    Phi <- matrix(0,nrow=p,ncol=p*K)
+    for(i in c(1:p)) Phi[i,((i-1)*K+1):(i*K)] <- bsVec
+    Phi
+  }
+  
+  Rho <- function(u, tau) u * (tau - (u < 0))
+  
+  # turn-off blas multithread to run in parallel
+  if(!mthreads) {
+    sink("NUL")
+    RhpcBLASctl::blas_set_num_threads(1)
+    sink()
+  }
+  n <- length(y)
+  ntau <-length(tau)
+  p <- ncol(X)
+  # create a coarse quantile grid for LP
+  sel.tau0 <- create_coarse_grid(tau,d)
+  tau0 <- tau[sel.tau0]
+  L <- length(tau0)
+  # create spline design matrix with knots provided by smooth.spline
+  sdm <- create_spline_matrix(tau0,tau)
+  K <- ncol(sdm$bsMat)
+  # rescale penalty parameter
+  c2 <- rescale_penalty(spar,n,tau0,X,sdm,weighted)
+  # set up the observation vector in dual LP
+  y2 <- c(rep(y,L),rep(0,p*L))
+  # set up the design matrix and rhs vector in dual LP
+  X2 <- matrix(0, nrow=(n+p)*L,ncol=p*K)
+  rhs <- rep(0,p*K)
+  for(ell in c(1:L)) {
+    alpha <- tau0[ell]
+    cc <- c2[ell]
+    # design matrix for spline coefficients
+    X0 <- create_Phi_matrix(sdm$bsMat[ell,],p)
+    X0 <- X %*% X0
+    sel <- ((ell-1)*n+1):(ell*n)
+    X2[sel,] <- X0
+    # design matrix (already weighted) for penalty function 
+    Z0 <- create_Phi_matrix(sdm$dbsMat[ell,],p)
+    # constraint matrix
+    sel <- (((ell-1)*p+1):(ell*p))+n*L
+    X2[sel,] <- 2 * cc * Z0
+    rhs <- rhs + (1-alpha) * apply(X0,2,sum) + cc * apply(Z0,2,sum)
+  }
+  rm(X0,Z0,sel)
+  # default initial value of n*L+p*L dual variables
+  zeta0 <- c( rep(1-tau0,each=n), rep(0.5, p*L) )
+  # compute the primal-dual LP solution
+  fit <- rq.fit.fnb2(x=X2, y=y2, zeta0=zeta0, rhs = rhs)
+  theta <- fit$coefficients[c(1:(p*K))]
+  zeta <- fit$dualvars
+  nit <- fit$nit
+  # clean up
+  rm(X2,y2,zeta0,rhs,fit)
+  # map to interpolated regression solution
+  theta <- matrix(theta,ncol=1)
+  beta <- matrix(0,nrow=p,ncol=ntau)
+  for(ell in c(1:ntau)) {
+    Phi <- create_Phi_matrix(sdm$bsMat2[ell,],p)
+    beta[,ell] <- Phi %*% theta
+  }
+  # np = number of points interpolated by the fitted values
+  # bic: aka sic (Koenker 2005, p. 234)
+  np <- rep(0,L)
+  fid <- rep(0,L)
+  for(ell in c(1:L)) {
+    Phi <- create_Phi_matrix(sdm$bsMat[ell,],p)
+	resid <- y - X %*% Phi %*% theta
+	np[ell] <- sum( abs(resid) < ztol )
+	fid[ell] <- mean(Rho(resid,tau0[ell]))
+  }
+  sic <- n * log( mean(fid) ) + 0.5 * log(n) * mean(np)
+  bic <- n * log( mean(fid) ) + log(n) * mean(np)
+  aic <- n * log( mean(fid) ) + 2 * mean(np)
+  crit <- c(aic,bic,sic)
+  names(crit) <- c("AIC","BIC","SIC")
+  return(list(coefficients=beta,crit=crit,np=np,fid=fid,nit=nit))
+}
+
+
+
+
+
+
+
+#' Spline Quantile Regression (SQR) by formula
+#'
+#' This function computes spline quantile regression (SQR) solution from response vector and design matrix.
+#' It uses the FORTRAN code \code{rqfnb.f} in the "quantreg" package with the kind permission of Dr. R. Koenker.
+#' @param formula a formula object, with the response on the left of a ~ operator, and the terms, separated by + operators, on the right. 
+#' @param tau sequence of quantile levels in (0,1)
+#' @param spar smoothing parameter: if \code{spar=NULL}, smoothing parameter is selected by \code{method}
+#' @param d subsampling rate of quantile levels (default = 1)
+#' @param weighted if \code{TRUE}, penalty function is weighted (default = \code{FALSE})
+#' @param mthreads if \code{FALSE}, set \code{RhpcBLASctl::blas_set_num_threads(1)} (default = \code{TRUE})
+#' @param method a criterion for smoothing parameter selection if \code{spar=NULL} (\code{"AIC"}, \code{"BIC"}, or \code{"SIC"})
+#' @param ztol a zero tolerance parameter used to determine the effective dimensionality of the fit
+#' @param data a data.frame in which to interpret the variables named in the formula
+#' @param subset an optional vector specifying a subset of observations to be used
+#' @param na.action a function to filter missing data (see \code{rq} in the 'quantreg' package)
+#' @param model if \code{TRUE} then the model frame is returned (needed for calling \code{summary} subsequently) 
+#' @return object of SQR fit
+#' @import 'stats'
+#' @import 'splines'
+#' @import 'RhpcBLASctl'
+#' @import 'quantreg'
+#' @export
+#' @examples
+#' library(quantreg)
+#' data(engel)
+#' engel$income <- engel$income - mean(engel$income)
+#' tau <- seq(0.1,0.9,0.05)
+#' fit <- rq(foodexp ~ income,tau=tau,data=engel)
+#' fit.sqr <- sqr(foodexp ~ income,tau=tau,spar=0.5,data=engel)
+#' par(mfrow=c(1,1),pty="m",lab=c(10,10,2),mar=c(4,4,2,1)+0.1,las=1)
+#' plot(tau,fit$coef[2,],xlab="Quantile Level",ylab="Coeff1")
+#' lines(tau,fit.sqr$coef[2,])
+sqr <- function (formula, tau = seq(0.1,0.9,0.2), spar = NULL, d=1, data, subset, na.action, 
+    model = TRUE, weighted = FALSE, mthreads = TRUE, method=c("AIC","BIC","SIC"), ztol = 1e-05) 
+{	
+    contrasts <- NULL 
+    call <- match.call()
+    mf <- match.call(expand.dots = FALSE)
+    m <- match(c("formula", "data", "subset", "na.action"), 
+        names(mf), 0)
+    mf <- mf[c(1, m)]
+    mf$drop.unused.levels <- TRUE
+    mf[[1]] <- as.name("model.frame")
+    mf <- eval.parent(mf)
+    mt <- attr(mf, "terms")
+    weights <- as.vector(model.weights(mf))
+    tau <- sort(unique(tau))
+    eps <- .Machine$double.eps^(2/3)
+    if (any(tau == 0)) 
+        tau[tau == 0] <- eps
+    if (any(tau == 1)) 
+        tau[tau == 1] <- 1 - eps
+    y <- model.response(mf)
+    X <- model.matrix(mt, mf, contrasts)
+    vnames <- dimnames(X)[[2]]
+	
+	method <- method[1]
+	if(!(method %in% c("AIC","BIC","SIC"))) method <- "AIC" 
+	
+    Rho <- function(u, tau) u * (tau - (u < 0))
+	
+    sqr_obj <- function(spar,X,y,tau,d,method,weighted=FALSE,mthreads=FALSE,ztol=1e-05) {
+	    crit <- sqr.fit(X,y,tau,spar,d=d,weighted=weighted,mthreads=mthreads,ztol=ztol)$crit
+        if(method=="SIC") {
+	      crit[3]
+	    } else {
+	      if(method=="BIC") {
+		    crit[2]
+	      } else { 
+	        crit[1]
+          }
+	    }
+    }
+
+    if (length(tau) > 3) {
+        if (any(tau < 0) || any(tau > 1)) 
+            stop("invalid tau:  taus should be >= 0 and <= 1")
+		if(is.null(spar)) {
+          spar <- stats::optimize(sqr_obj,interval=c(-1.5,1.5),
+	         X=X,y=y,tau=tau,d=d,method=method,weighted=weighted,mthreads=mthreads,ztol=ztol)$minimum
+        }	
+        coef <- matrix(0, ncol(X), length(tau))
+        rho <- rep(0, length(tau))
+        fitted <- resid <- matrix(0, nrow(X), length(tau))
+        z <- sqr.fit(X,y,tau=tau,spar=spar,d=d,weighted=weighted,mthreads=mthreads)
+        coef <- z$coefficients
+		fitted <- y - X %*% coef
+        resid <- y - fitted
+        for(i in c(1:length(tau))) rho[i] <- sum(Rho(resid[,i], tau[i]))
+        taulabs <- paste("tau=", format(round(tau, 3)))
+        dimnames(coef) <- list(vnames, taulabs)
+        dimnames(resid)[[2]] <- taulabs
+        fit <- z
+        fit$coefficients <- coef
+        fit$residuals <- resid
+		fit$fitted.values <- fitted
+		fit$spar <- spar
+		fit$criterion <- method
+        class(fit) <- "rqs"
+    }
+    else {
+	    stop("need at least four unique quantile levels")
+    }
+    fit$na.action <- attr(mf, "na.action")
+    fit$formula <- formula
+    fit$terms <- mt
+    fit$xlevels <- .getXlevels(mt, mf)
+    fit$call <- call
+    fit$tau <- tau
+    fit$weights <- weights
+    fit$residuals <- drop(fit$residuals)
+    fit$rho <- rho
+    fit$method <- "br"
+    fit$fitted.values <- drop(fit$fitted.values)
+    attr(fit, "na.message") <- attr(m, "na.message")
+    if (model) 
+        fit$model <- mf
+    fit
+}
+
+
+
+
+#' Trigonometric Spline Quantile Regression (TSQR) of Time Series
+#'
+#' This function computes trigonometric spline quantile regression (TSQR) for univariate time series at a single frequency.
+#' @param y time series
+#' @param f0 frequency in [0,1)
+#' @param tau sequence of quantile levels in (0,1)
+#' @param spar smoothing parameter
+#' @param d subsampling rate of quantile levels (default = 1)
+#' @param weighted if \code{TRUE}, penalty function is weighted (default = \code{FALSE})
+#' @param mthreads if \code{FALSE}, set \code{RhpcBLASctl::blas_set_num_threads(1)} (default = \code{TRUE})
+#' @param prepared if \code{TRUE}, intercept is removed and coef of cosine is doubled when \code{f0 = 0.5}
+#' @param ztol zero tolerance parameter used to determine the effective dimensionality of the fit
+#' @return object of \code{sqr.fit()} (coefficients in \code{$coef})
+#' @export
+#' @examples
+#' y <- stats::arima.sim(list(order=c(1,0,0), ar=0.5), n=64)
+#' tau <- seq(0.1,0.9,0.05)
+#' fit <- tqr.fit(y,f0=0.1,tau=tau)
+#' fit.sqr <- tsqr.fit(y,f0=0.1,tau=tau,spar=1,d=4)
+#' plot(tau,fit$coef[1,],type='p',xlab='QUANTILE LEVEL',ylab='TQR COEF')
+#' lines(tau,fit.sqr$coef[1,],type='l')
+tsqr.fit <- function(y,f0,tau,spar=1,d=1,weighted=FALSE,mthreads=TRUE,prepared=TRUE,ztol=1e-05) {
+  
+  create_trig_design_matrix <- function(f0,n) {
+  # create design matrix for trignometric regression of time series
+  # input: f0 = frequency in [0,1)
+  #         n = length of time series
+    tt <- c(1:n)
+    if(f0 != 0.5 & f0 != 0) {
+      X <- cbind(rep(1,n),cos(2*pi*f0*tt),sin(2*pi*f0*tt))
+    }
+    if(f0 == 0.5) {
+      X <- cbind(rep(1,n),cos(2*pi*0.5*tt))
+    }
+    if(f0 == 0) {
+      X <- matrix(rep(1,n),ncol=1)
+    }
+    X
+  }
+
+  fix_tqr_coef <- function(coef) {
+  # prepare coef from tqr for qdft
+  # input:  coef = p*ntau tqr coefficient matrix from tqr.fit()
+  # output: 2*ntau matrix of tqr coefficients
+    ntau <- ncol(coef)
+    if(nrow(coef)==1) {   
+      # for f = 0
+      coef <- rbind(rep(0,ntau),rep(0,ntau))
+    } else if(nrow(coef)==2) {  
+      # for f = 0.5: rescale coef of cosine by 2 so qdft can be defined as usual
+      coef <- rbind(2*coef[2,],rep(0,ntau))
+    } else {
+      # for f in (0,0.5)
+      coef <- coef[-1,]
+    }
+    coef
+  }
+
+  n <- length(y)
+  X <- create_trig_design_matrix(f0,n)
+  fit <- sqr.fit(X,y,tau,spar=spar,d=d,weighted=weighted,mthreads=mthreads,ztol=ztol)
+  if(prepared) fit$coefficients <- fix_tqr_coef(fit$coefficients)
+  fit
+}
+
+
+#' Spline Quantile Discrete Fourier Transform (SQDFT) of Time Series Given Smoothing Parameter
+#'
+#' This function computes spline quantile discrete Fourier transform (SQDFT) for univariate or multivariate time series
+#' through trigonometric spline quantile regression with user-supplied spar.
+#' @param y vector or matrix of time series (if matrix, \code{nrow(y)} = length of time series)
+#' @param tau sequence of quantile levels in (0,1)
+#' @param spar smoothing parameter
+#' @param d subsampling rate of quantile levels (default = 1)
+#' @param weighted if \code{TRUE}, penalty function is weighted (default = \code{FALSE})
+#' @param ztol zero tolerance parameter used to determine the effective dimensionality of the fit
+#' @param n.cores number of cores for parallel computing (default = 1)
+#' @param cl pre-existing cluster for repeated parallel computing (default = \code{NULL})
+#' @return A list with the following elements:
+#'   \item{coefficients}{matrix of regression coefficients}
+#'   \item{qdft}{matrix or array of the spline quantile discrete Fourier transform of \code{y}}
+#'   \item{crit}{criteria for smoothing parameter selection: (AIC,BIC,SIC)}
+#' @import 'stats'
+#' @import 'splines'
+#' @import 'RhpcBLASctl'
+#' @import 'quantreg'
+#' @import 'foreach'
+#' @import 'parallel'
+#' @import 'doParallel'
+#' @export
+#' @examples
+#' y <- stats::arima.sim(list(order=c(1,0,0), ar=0.5), n=64)
+#' tau <- seq(0.1,0.9,0.05)
+#' y.sqdft <- sqdft.fit(y,tau,spar=1,d=4)$qdft
+sqdft.fit <- function(y,tau,spar=1,d=1,weighted=FALSE,ztol=1e-05,n.cores=1,cl=NULL) {
+
+  z <- function(x) { x <- matrix(x,nrow=2); x[1,]-1i*x[2,] }
+
+  extend_qdft <- function(y,tau,result,sel.f) {
+  # define qdft from tqr coefficients
+  # input: y = ns*nc-matrix or ns-vector of time series
+  #        tau = ntau-vector of quantile levels
+  #        result = list of qdft in (0,0.5]
+  #        sel.f = index of Fourier frequencies in (0,0.5)
+  # output: out = nc*ns*ntau-array or ns*ntau matrix of qdft
+
+    if(!is.matrix(y)) y <- matrix(y,ncol=1)
+    nc <- ncol(y)
+    ns <- nrow(y)
+    ntau <- length(tau)  
+    out <- array(NA,dim=c(nc,ns,ntau))
+    for(k in c(1:nc)) {
+      # define QDFT at freq 0 as ns * quantile
+      out[k,1,] <- ns * stats::quantile(y[,k],tau)
+      # retrieve qdft for freq in (0,0.5]
+      tmp <- matrix(unlist(result[[k]]),ncol=ntau,byrow=TRUE)
+      # define remaining values by conjate symmetry (excluding f=0.5) 
+      tmp2 <- NULL
+      for(j in c(1:ntau)) {
+        tmp2 <- cbind(tmp2,rev(Conj(tmp[sel.f,j])))
+      }
+      # assemble & rescale everything by ns/2 so that periodogram = |dft|^2/ns
+      out[k,c(2:ns),] <- rbind(tmp,tmp2) * ns/2
+    }
+    if(nc == 1) out <- matrix(out[1,,],ncol=ntau)
+    out
+  }
+
+  mthreads <- (n.cores == 1)
+  if(!is.matrix(y)) y <- matrix(y,ncol=1)
+  ns <- nrow(y)
+  nc <- ncol(y)
+  f2 <- c(0:(ns-1))/ns
+  # compute QR at half of the Fourier frequencies, excluding 0
+  f <- f2[which(f2 > 0 & f2 <= 0.5)]
+  sel.f <- which(f < 0.5)
+  nf <- length(f)
+  ntau <- length(tau)
+  keep.cl <- TRUE
+  if(n.cores>1 & is.null(cl)) {
+    cl <- parallel::makeCluster(n.cores)
+    parallel::clusterExport(cl, c("tsqr.fit","sqr.fit","rq.fit.fnb2"))
+    doParallel::registerDoParallel(cl)
+    keep.cl <- FALSE
+  }
+  `%dopar%` <- foreach::`%dopar%`
+  `%do%` <- foreach::`%do%`
+  # qdft for f in (0,0.5]
+  i <- 0  
+  result <- list()
+  result2 <- list()
+  for(k in c(1:nc)) {
+    yy <- y[,k] 
+    if(n.cores>1) {
+        tmp <- foreach::foreach(i=1:nf, .packages='quantreg') %dopar% {
+		fit <- tsqr.fit(yy,f[i],tau,spar=spar,d=d,weighted=weighted,mthreads=mthreads,ztol=ztol)
+	    coef <- fit$coef
+		crit <- fit$crit
+		list(coef=coef,crit=crit)
+      }
+    } else {
+      tmp <- foreach::foreach(i=1:nf) %do% {
+        fit <- tsqr.fit(yy,f[i],tau,spar=spar,d=d,weighted=weighted,mthreads=mthreads,ztol=ztol)
+		coef <- fit$coef
+		crit <- fit$crit
+		list(coef=coef,crit=crit)
+      }
+    }
+    # tmp$coef = a list over freq of 2 x ntau coefficiets 
+    tmp.coef <- lapply(tmp,FUN=function(x) {apply(x$coef,2,z)})
+    result[[k]] <- tmp.coef
+	tmp.crit <- lapply(tmp,FUN=function(x) { x$crit } )
+	result2[[k]] <- tmp.crit 
+  }
+  if(n.cores>1 & !keep.cl) {
+    parallel::stopCluster(cl)
+    cl <- NULL
+  }
+  
+  # extend qdft to f=0 and f in (0.5,1) 
+  out <- extend_qdft(y,tau,result,sel.f)
+
+  out2 <- rep(0,3)
+  for(k in c(1:nc)) {
+    for(j in c(1:nf)) out2 <- out2 + result2[[k]][[j]]
+  }
+  out2 <- out2 / nf
+ 
+  return(list(qdft=out,crit=out2))
+}
+
+
+
+
+#' Spline Quantile Discrete Fourier Transform (SQDFT) of Time Series
+#'
+#' This function computes spline quantile discrete Fourier transform (SQDFT) for univariate or multivariate time series
+#' through trigonometric spline quantile regression.
+#' @param y vector or matrix of time series (if matrix, \code{nrow(y)} = length of time series)
+#' @param tau sequence of quantile levels in (0,1)
+#' @param spar smoothing parameter: if \code{spar=NULL}, smoothing parameter is selected by \code{method}
+#' @param d subsampling rate of quantile levels (default = 1)
+#' @param weighted if \code{TRUE}, penalty function is weighted (default = \code{FALSE})
+#' @param method crietrion for smoothing parameter selection when \code{spar=NULL} (\code{"AIC"}, \code{"BIC"}, or \code{"SIC"})
+#' @param ztol zero tolerance parameter used to determine the effective dimensionality of the fit
+#' @param n.cores number of cores for parallel computing (default = 1)
+#' @param cl pre-existing cluster for repeated parallel computing (default = \code{NULL})
+#' @return A list with the following elements:
+#'   \item{coefficients}{matrix of regression coefficients}
+#'   \item{qdft}{matrix or array of the spline quantile discrete Fourier transform of \code{y}}
+#'   \item{crit}{criteria for smoothing parameter selection: (AIC,BIC,SIC)}
+#' @import 'stats'
+#' @import 'splines'
+#' @import 'RhpcBLASctl'
+#' @import 'quantreg'
+#' @import 'foreach'
+#' @import 'parallel'
+#' @import 'doParallel'
+#' @export
+#' @examples
+#' y <- stats::arima.sim(list(order=c(1,0,0), ar=0.5), n=64)
+#' tau <- seq(0.1,0.9,0.05)
+#' y.sqdft <- sqdft(y,tau,spar=NULL,d=4,metho="AIC")$qdft
+sqdft <- function(y,tau,spar=NULL,d=1,weighted=FALSE,method=c("AIC","BIC","SIC"),
+                  ztol=1e-05,n.cores=1,cl=NULL) 
+{
+
+  sqdft_obj <- function(spar,y,tau,d,weighted=FALSE,method=c("AIC","BIC","SIC"),ztol=1e-05,n.cores=1,cl=NULL) {
+    crit <- sqdft.fit(y,tau,spar=spar,d=d,weighted=weighted,ztol=ztol,n.cores=n.cores,cl=cl)$crit
+    if(method[1]=="BIC") {
+	  crit[2]
+	} else {
+	  if(method[1]=="SIC") {
+	    crit[3]
+	  } else {
+	    crit[1]
+	  }
+	}
+  }
+  
+  if(is.null(spar)) {
+    spar <- stats::optimize(sqdft_obj,interval=c(-1.5,1.5),
+	        y=y,tau=tau,d=d,weighted=weighted,method=method[1],ztol=ztol,n.cores=n.cores,cl=cl)$minimum
+  }
+  fit <- sqdft.fit(y,tau,spar=spar,d=d,weighted=weighted,ztol=ztol,n.cores=n.cores,cl=cl)
+  return(list(qdft=fit$qdft,spar=spar))
+}
+  
+  
+
+# add gradient algorithms for SQR (January 2025)
+
+
+optim.adam <- function(theta0,fn,gr,...,sg.rate=c(1,1),gr.m=NULL,gr.v=NULL,
+  control=list()) {
+# The ADAM method to find the minimizer fn - allow stochastic gradient and scheduled stepsize reduction
+# input:  theta0 = vector of initial values of parameter
+#             fn = objective function
+#             gr = gradient function
+#            ... = additional parameters of fn and gr
+#           gr.m = vector of initial values of mean gradient (same dimension as theta0)
+#           gr.v = vector of initial values of mean squared gradient (same dimension as theta0)
+#        sg.rate = vector of sampling rates for quantiles and observations in stochastic gradient calculation
+# output:    par = optimum parameter
+#    convergence = convergence indicator (0 = converged; 1 = maxit is reseached before convergence)
+#          value = minimum value of the objective function
+
+  con <- list(maxit = 100, stepsize=0.01, warmup=70, stepupdate=20, stepredn=0.2, seed=1000,trace=0,
+  reltol=sqrt(.Machine$double.eps),converge.test=F)
+  con[(namc <- names(control))] <- control
+  
+  maxit <- con$maxit
+  reltol <- con$reltol
+  stepsize <- con$stepsize
+  warmup <- con$warmup
+  stepupdate <- con$stepupdate
+  stepredn <- con$stepredn
+  converge.test <- con$converge.test
+  trace <- con$trace
+  seed <- con$seed
+  
+  fn2 <- function(par) fn(par, ...)
+  gr2 <- function(par,sg.rate) gr(par, ..., sg.rate)
+  
+  ptm <- proc.time()
+
+  set.seed(seed)
+  
+  b1 <- 0.9
+  b2 <- 0.999
+  eps <- 1e-8
+  if(is.null(gr.m)) {
+    m <- rep(0,length(theta0))
+  } else {
+	m <- gr.m
+  }
+  if(is.null(gr.v)) {
+    v <- rep(0,length(theta0))
+  } else {
+	v <- gr.v
+  }
+  theta <- theta0
+  if(converge.test) cost <- fn2(theta)
+  if(trace == -1) { 
+    pars <- matrix(NA,nrow=length(theta),ncol=maxit)
+    times <- rep(NA,maxit)
+    vals <- rep(NA,maxit)
+    steps <- rep(NA,maxit)
+  }
+  convergence <- 1
+  i <- 1
+  s <- stepsize
+  while(i <= maxit & convergence == 1) {
+    if( i > warmup ) {
+      if(stepupdate > 0) {
+        if(i %% stepupdate == 0 ) {
+          s <- s * stepredn
+        }
+      }
+    }
+    g <- gr2(theta,sg.rate)
+    m <- b1 * m	+ (1-b1) * g
+    v <- b2 * v + (1-b2) * g^2
+    d <- m / (1 - b1^i)
+    d <- d / (sqrt(v / (1 - b2^i)) + eps)
+    theta <- theta - s * d
+    if(trace == -1) { 
+      pars[,i] <- theta
+      times[i] <- (proc.time()-ptm)[3]
+      vals[i] <- fn2(theta)
+	  steps[i] <- s
+    }
+    if(converge.test) {
+      cost2 <- fn2(theta)	
+      if(abs(cost2-cost) < reltol*(abs(cost)+reltol)) convergence <- 0
+      cost <- cost2
+    }
+    i <- i + 1
+  }
+  if(!converge.test) cost <- fn2(theta)
+  if(trace == -1) {
+    return(list(par=theta,convergence=convergence,value=cost,counts=i-1,gr.m=m,gr.v=v,
+                vals=vals,all.par=pars,all.time=times,steps=steps)) 
+  } else {
+    return(list(par=theta,convergence=convergence,value=cost,counts=i-1,gr.m=m,gr.v=v))
+  }
+}
+
+
+
+optim.grad <- function(theta0,fn,gr,...,sg.rate=c(1,1),gr.m=NULL,gr.v=NULL,
+  control=list()) {
+# enhanced ADAM with limited line search to minimize fn: allow stochastic gradient
+# input:  theta0 = vector of initial values of parameter
+#             fn = objective function
+#             gr = gradient function
+#            ... = additional parameters of fn and gr
+#           gr.m = vector of initial values of mean gradient (same dimension as theta0)
+#           gr.v = vector of initial values of mean squared gradient (same dimension as theta0)
+#        sg.rate = vector of sampling rates for quantiles and observations in stochastic gradient calculation
+# output:    par = optimum parameter
+#    convergence = convergence indicator (0 = converged; 1 = maxit is reseached before convergence)
+#          value = minimum value of the objective function
+
+  con <- list(maxit = 100, stepsize=0.01, warmup=70, stepupdate=20, stepredn=0.2, line.search.type=1,
+  seed=1000,trace=0,reltol=sqrt(.Machine$double.eps),acctol=1e-04, line.search.max=5, converge.test=F)
+  con[(namc <- names(control))] <- control
+  
+  maxit <- con$maxit
+  warmup <- con$warmup
+  reltol <- con$reltol
+  stepsize <- con$stepsize
+  converge.test <- con$converge.test
+  trace <- con$trace
+  acctol <- con$acctol
+  stepredn <- con$stepredn
+  stepupdate <- con$stepupdate
+  count.max <- con$line.search.max
+  line.search.type <- con$line.search.type[1]
+  seed <- con$seed
+  
+  fn2 <- function(par) fn(par, ...)
+  gr2 <- function(par,sg.rate) gr(par, ..., sg.rate)
+  
+  ptm <- proc.time()
+  
+  set.seed(seed)
+  
+  b1 <- 0.9
+  b2 <- 0.999
+  eps <- 1e-8
+  if(is.null(gr.m)) {
+    m <- rep(0,length(theta0))
+  } else {
+	m <- gr.m
+  }
+  if(is.null(gr.v)) {
+    v <- rep(0,length(theta0))
+  } else {
+    v <- gr.v  
+  }
+  theta <- theta0
+  if(converge.test) cost <- fn2(theta)
+  if(trace == -1) {
+    pars <- matrix(NA,nrow=length(theta),ncol=maxit)
+    times <- rep(NA,maxit)
+    vals <- rep(NA,maxit)
+    steps <- rep(NA,maxit)
+  }
+  convergence <- 1
+  i <- 1
+  s <- stepsize
+  while(i <= maxit & convergence == 1) {
+    g <- gr2(theta,sg.rate)
+    m <- b1 * m	+ (1-b1) * g
+    v <- b2 * v + (1-b2) * g^2
+    d <- m / (1 - b1^i)
+    d <- d / (sqrt(v / (1 - b2^i)) + eps)
+    if(i > warmup) {
+      if(stepupdate > 0) {
+	    if(i %% stepupdate == 0) {
+          gradproj <- sum(d * d)
+          if(line.search.type %in% c(1,2)) {
+            # type=1 or 2: start with default step size
+			steplength <- min(1, stepsize / stepredn^(floor(count.max/2)))
+            ##steplength <- stepsize
+          } else {
+            # type=3 or 4: start with current step size
+			steplength <- min(1, s / stepredn^(floor(count.max/2)))
+            ##steplength <- s
+          }
+          accpoint <- F
+          fmin <- fn2(theta)
+          count <- 0
+          while(!accpoint & count < count.max) {
+            f <- fn2(theta - steplength * d)
+            count <- count + 1
+            accpoint <- (f <= fmin - gradproj * steplength * acctol)  
+            if(!accpoint) {
+              steplength <- steplength * stepredn
+            }
+          }
+          if(accpoint) {
+            s <- steplength
+          } else {
+            if(line.search.type %in% c(1,4)) {
+              # type=1 or 4: fallback to default
+              s <- stepsize		
+            } else {
+              # type=2 or 3: fallback to reduced default 
+              s <- stepsize * stepredn
+            }
+          }
+        }
+      }
+    }
+    theta <- theta - s * d
+    if(trace == -1) {
+      pars[,i] <- theta
+      times[i] <- (proc.time()-ptm)[3]
+      vals[i] <- fn2(theta)
+      steps[i] <- s
+    }
+    if(converge.test) {
+      cost2 <- fn2(theta)	
+      if(abs(cost2-cost) < reltol*(abs(cost)+reltol)) convergence <- 0
+      cost <- cost2
+    }
+    i <- i + 1
+  }
+  if(!converge.test) cost <- fn2(theta)
+  if(trace == -1) {
+    return(list(par=theta,convergence=convergence,value=cost,counts=i-1,gr.m=m,gr.v=v,stepsize=s,
+                steps=steps,vals=vals,all.par=pars,all.time=times))
+  } else {
+    return(list(par=theta,convergence=convergence,value=cost,counts=i-1,gr.m=m,gr.v=v,stepsize=s))
+  }
+}
+
+
+
+sqr.optim_obj <- function(theta,y,X,tau0,sdm,spar=0,weighted=FALSE) {
+  # objective function of spline quantile regression
+  # input:  theta = p*K-vector of spline coefficients
+  #                 where p = number of regression coefficients
+  #                     K = number of spline basis functions
+  #             y = n-vector of time series
+  #             X = n*p regression design matrix
+  #          tau0 = L-vector of selected quantile levels
+  #           sdm = objec from create_spline_matrix
+  #          spar = user-specified smoothing parameter
+  #      weighted = T if penalty term gets quantile-dependent weights
+  # output: cost = value of the objecitive function
+
+
+  create_weights <- function(tau) {
+  # quantile-dependent weights of second derivatives in SQR penalty
+    0.25 / (tau*(1-tau))
+  }
+
+  rescale_penalty <- function(spar,n,tau0,X,sdm,weighted=FALSE) {
+  # rescale penalty par by weights and weighted l1 norm of dbsMat
+  # input: spar = user-specified penalty parameter
+  #           n = number of observations
+  #        tau0 = L vector of quantile levels
+  #           X = design matrix
+  #         sdm = object from create_spline_matrix()
+  #    weighted = TRUE if penalty is weighted
+  # output:  c2 = n * c * w
+  # dependencies: create_weights(), create_Phi_matrix()
+    L <- length(tau0)
+	p <- ncol(X)
+	n <- nrow(X)
+    if(weighted) {
+      w <- create_weights(tau0)
+    } else {
+      w <- rep(1,L)  
+    }
+	r <- 0
+	for(ell in c(1:L)) {
+      # design matrix for spline coefficients
+      X0 <- create_Phi_matrix(sdm$bsMat[ell,],p)
+      X0 <- X %*% X0
+      r <- r + sum(abs(X0))
+    }
+	r <- r / sum(abs(w * sdm$dbsMat))
+    c2 <- w * r * 1000.0**(spar - 1.0)
+    c2
+  }
+
+  create_Phi_matrix <- function(bsVec,p) {
+  # create spline basis matrix for LP and dual LP
+  # input: bsVec = K-vector of bs functions (K=number of basis functions)
+  #            p = number of parameters
+  # output:  Phi = p*pK matrix of basis functions
+    K <- length(bsVec)
+    Phi <- matrix(0,nrow=p,ncol=p*K)
+    for(i in c(1:p)) Phi[i,((i-1)*K+1):(i*K)] <- bsVec
+    Phi
+  }
+  
+  Rho <- function(u, tau) u * (tau - (u < 0))
+ 
+  n <- length(y)
+  L <- length(tau0)
+  p <- ncol(X)
+
+  # rescale penalty parameter
+  c2 <- rescale_penalty(spar,n,tau0,X,sdm,weighted)
+  
+  theta <- matrix(theta,ncol=1)
+  
+  cost <- 0
+  for(ell in c(1:L)) {
+    # regression design matrix for spline coefficients
+    Phi <- create_Phi_matrix(sdm$bsMat[ell,],p)
+    cost <- cost + sum( Rho(y - c(X %*% (Phi %*% theta)),tau0[ell]) )
+    # design matrix for penalty function
+    Z0 <- create_Phi_matrix(sdm$dbsMat[ell,],p)
+    cost <- cost + c2[ell] * sum( abs( Z0 %*% theta ) )
+  }
+  cost
+}
+
+
+
+sqr.optim_dobj <- function(theta,y,X,tau0,sdm,spar=0,weighted=FALSE,sg.rate=c(1,1),eps=1e-8) {
+  # derivative of the objective function of spline quantile regression
+  # input:  theta = p*K-vector of spline coefficients
+  #                 where p = number of regression coefficients
+  #                     K = number of spline basis functions
+  #            y = n-vector of time series
+  #            X = n*p regression design matrix
+  #         tau0 = L-vector of selected quantile levels
+  #          sdm = object from create_spline_matrix()
+  #         spar = user-specified smoothing parameter
+  #     weighted = T if penalty term gets quantile-dependent weights
+  #      sg.rate = vector of sampling rates for quantiles and observations
+  # output: dcost = value of the derivative of the objecitive function
+  
+  drho.rq <- function(y,tau,eps) {
+    # derivative of check function for quantile regression
+    # input: y = n-vector of dependent variables
+    #        tau = quantile level
+    # output: drho = n-vector of drho(y) evaluated at tau
+    drho <- y
+	drho[y>0] <- tau
+    drho[y<0] <- -(1-tau)
+	drho[abs(y) < eps] <- 0
+	drho
+  }
+
+  dabs <- function(y,eps) {
+    # derivative of absolute value
+    dabs <- y
+    dabs[y>0] <- 1
+    dabs[y<0] <- -1
+    dabs[abs(y) < eps] <- 0
+    dabs
+  }
+  
+  create_weights <- function(tau) {
+  # quantile-dependent weights of second derivatives in SQR penalty
+    0.25 / (tau*(1-tau))
+  }
+
+  rescale_penalty <- function(spar,n,tau0,X,sdm,weighted=FALSE) {
+  # rescale penalty par by weights and weighted l1 norm of dbsMat
+  # input: spar = user-specified penalty parameter
+  #           n = number of observations
+  #        tau0 = L vector of quantile levels
+  #           X = design matrix
+  #         sdm = object from create_spline_matrix()
+  #    weighted = TRUE if penalty is weighted
+  # output:  c2 = n * c * w
+  # dependencies: create_weights(), create_Phi_matrix()
+    L <- length(tau0)
+	p <- ncol(X)
+	n <- nrow(X)
+    if(weighted) {
+      w <- create_weights(tau0)
+    } else {
+      w <- rep(1,L)  
+    }
+	r <- 0
+	for(ell in c(1:L)) {
+      # design matrix for spline coefficients
+      X0 <- create_Phi_matrix(sdm$bsMat[ell,],p)
+      X0 <- X %*% X0
+      r <- r + sum(abs(X0))
+    }
+	r <- r / sum(abs(w * sdm$dbsMat))
+    c2 <- w * r * 1000.0**(spar - 1.0)
+    c2
+  }
+
+  create_Phi_matrix <- function(bsVec,p) {
+  # create spline basis matrix for LP and dual LP
+  # input: bsVec = K-vector of bs functions (K=number of basis functions)
+  #            p = number of parameters
+  # output:  Phi = p*pK matrix of basis functions
+    K <- length(bsVec)
+    Phi <- matrix(0,nrow=p,ncol=p*K)
+    for(i in c(1:p)) Phi[i,((i-1)*K+1):(i*K)] <- bsVec
+    Phi
+  }
+  
+  n <- length(y)
+  L <- length(tau0)
+  p <- ncol(X)
+
+  # rescale penalty parameter
+  c2 <- rescale_penalty(spar,n,tau0,X,sdm,weighted)
+	
+  theta <- matrix(theta,ncol=1)
+  
+  # sample the quantiles (min=2)
+  sel.L <- c(1:L)
+  if(sg.rate[1] < 1 && sg.rate[1] > 0) {
+    sel.L <- sample(c(1:L),max(2,floor(sg.rate[1] * L)))
+  }
+  # sample the observations (min=10)
+  sel.n <- c(1:n)
+  if(sg.rate[2] < 1 && sg.rate[2] > 0) {
+    sel.n <- sample(c(1:n),max(10,floor(sg.rate[2] * n)))
+  }
+  
+  dcost <- rep(0,nrow(theta))
+  for(ell in sel.L) {
+    # regression design matrix for spline coefficients
+    X1 <- create_Phi_matrix(sdm$bsMat[ell,],p)
+	X1 <- X[sel.n,] %*% X1
+    tmp <- matrix(drho.rq(y[sel.n] - c(X1 %*% theta),tau0[ell],eps),ncol=1)
+    tmp <- -crossprod(X1,tmp)
+    # rescale for observations
+    tmp <- tmp * (n / length(sel.n))
+    dcost <- dcost + tmp 
+    # design matrix for penalty function
+    Z0 <- create_Phi_matrix(sdm$dbsMat[ell,],p)
+    tmp <- matrix(dabs( c(Z0 %*% theta),eps ),ncol=1)
+    tmp <- crossprod(Z0,tmp)
+    dcost <- dcost + c2[ell] * tmp
+  }
+  # rescale to offset the effect of sampling
+  dcost <- dcost * (L / length(sel.L))
+  dcost
+}
+
+
+
+#' Spline Quantile Regression (SQR) by Gradient Algorithms
+#'
+#' This function computes spline quantile regression by a gradient algorithm BFGS, ADAM, or GRAD.
+#' @param X vecor or matrix of explanatory variables (including intercept)
+#' @param y vector of dependent variable
+#' @param tau sequence of quantile levels in (0,1)
+#' @param spar smoothing parameter
+#' @param d subsampling rate of quantile levels (default = 1)
+#' @param weighted if \code{TRUE}, penalty function is weighted (default = \code{FALSE})
+#' @param method optimization method: \code{"BFGS"} (default), \code{"ADAM"}, or \code{"GRAD"}
+#' @param beta.rq matrix of regression coefficients from \code{quantreg::rq(y~X)} for initialization (default = \code{NULL})
+#' @param theta0 initial value of spline coefficients (default = \code{NULL})
+#' @param spar0 smoothing parameter for \code{stats::smooth.spline()} to smooth \code{beta.rq} for initilaiztion (default = \code{NULL})
+#' @param sg.rate vector of sampling rates for quantiles and observations in stochastic gradient version of GRAD and ADAM
+#' @param mthreads if \code{FALSE}, set \code{RhpcBLASctl::blas_set_num_threads(1)} (default = \code{TRUE})
+#' @param control a list of control parameters
+#' \describe{
+#'   \item{\code{maxit}:}{max number of iterations (default = 100)}
+#'   \item{\code{stepsize}:}{stepsize for ADAM and GRAD (default = 0.01)}
+#'   \item{\code{warmup}:}{length of warmup phase for ADAM and GRAD (default = 70)}
+#'   \item{\code{stepupdate}:}{frequency of update for ADAM and GRAD (default = 20)}
+#'   \item{\code{stepredn}:}{stepsize discount factor for ADAM and GRAD (default = 0.2)}
+#'   \item{\code{line.search.type}:}{line search option (1,2,3,4) for GRAD (default = 1)}
+#'   \item{\code{line.search.max}:}{max number of line search trials for GRAD (default = 1)}
+#'   \item{\code{seed}:}{seed for stochastic version of ADAM and GRAD (default = 1000)}
+#'   \item{\code{trace}:}{-1 return results from all iterations, 0 (default) return final result}
+#' }
+#' @return A list with the following elements:
+#'   \item{beta}{matrix of regression coefficients}
+#'   \item{all.beta}{coefficients from all iterations for GRAD and ADAM}
+#'   \item{spars}{smoothing parameters from \code{stats::smooth.spline()} for initialization}
+#'   \item{fit}{object from the optimization algorithm}
+#' @import 'stats'
+#' @import 'splines'
+#' @import 'RhpcBLASctl'
+#' @export
+#' @examples
+#' data(engel)
+#' y <- engel$foodexp
+#' X <- cbind(rep(1,length(y)),engel$income-mean(engel$income))
+#' tau <- seq(0.1,0.9,0.05)
+#' fit.rq <- quantreg::rq(y ~ X[,2],tau)
+#' fit.sqr <- sqr(y ~ X[,2],tau,d=2,spar=0.2)
+#' fit <- sqr.fit.optim(X,y,tau,spar=0.2,d=2,method="BFSG",beta.rq=fit.rq$coef)
+#' fit <- sqr.fit.optim(X,y,tau,spar=0.2,d=2,method="BFSG",beta.rq=fit.rq$coef)
+#' par(mfrow=c(1,2),pty="m",lab=c(10,10,2),mar=c(4,4,2,1)+0.1,las=1)
+#' for(j in c(1:2)) {
+#'   plot(tau,fit.rq$coef[j,],type="n",xlab="QUANTILE LEVEL",ylab=paste0("COEFF",j))
+#'   points(tau,fit.rq$coef[j,],pch=1,cex=0.5)
+#'   lines(tau,fit.sqr$coef[j,],lty=1); lines(tau,fit$beta[j,],lty=2,col=2)
+#' }
+sqr.fit.optim <- function(X,y,tau,spar=0,d=1,weighted=FALSE,method=c("BFGS","ADAM","GRAD"),
+  beta.rq=NULL,theta0=NULL,spar0=NULL,sg.rate=c(1,1),mthreads=TRUE,control=list(trace=0)) {
+
+  create_coarse_grid <- function(tau,d=1) {
+  # create index of a coarse quantile grid for SQR
+    ntau <- length(tau)
+    sel.tau0 <- seq(1,ntau,d)
+    if(sel.tau0[length(sel.tau0)] < ntau) sel.tau0 <- c(sel.tau0,ntau)
+    sel.tau0
+  }
+
+  create_spline_matrix <- function(tau0,tau) {
+  # create spline matrix and its second derivative for SQR
+  # input:    tau0 = subset of tau
+  #            tau = complete set of quantiles for interpolation
+  # output: bsMat  = matrix of basis functions
+  #         dbsMat = matrix of second derivatives
+  #         bsMat2 = maxtrix of basis function for interpolation to tau
+  # imports: 'splines'
+    knots <- stats::smooth.spline(tau0,tau0)$fit$knot 
+    # rescale tau0 and tau to [0,1] for spline matrix to be consistent with smooth.spline
+    bsMat <- splines::splineDesign(knots,(tau0-min(tau0))/(max(tau0)-min(tau0)))
+    dbsMat <- splines::splineDesign(knots,(tau0-min(tau0))/(max(tau0)-min(tau0)),derivs=2)
+    bsMat2 <- splines::splineDesign(knots,(tau-min(tau))/(max(tau)-min(tau)))
+    return(list(bsMat=bsMat,dbsMat=dbsMat,bsMat2=bsMat2,knots=knots))
+  }
+
+  create_Phi_matrix <- function(bsVec,p) {
+  # create spline basis matrix for LP and dual LP
+  # input: bsVec = K-vector of bs functions (K=number of basis functions)
+  #            p = number of parameters
+  # output:  Phi = p*pK matrix of basis functions
+    K <- length(bsVec)
+    Phi <- matrix(0,nrow=p,ncol=p*K)
+    for(i in c(1:p)) Phi[i,((i-1)*K+1):(i*K)] <- bsVec
+    Phi
+  }
+  
+  # gr.m = vector of initial value of mean gradient for 'grad' and 'adam'
+  # gr.v = vector of initial value of mean squared gradient for 'grad' and 'adam'  
+  gr.m <- NULL
+  gr.v <- NULL
+  return.beta0 <- FALSE
+
+  con <- list()
+  con[(namc <- names(control))] <- control
+  method <- method[1]
+  if(!(method %in% c('GRAD'))) {
+    con$warmup <- NULL
+    con$line.search <- NULL
+    con$line.search.max <- NULL
+    con$line.search.type <- NULL
+  }
+  if(!(method %in% c('ADAM','GRAD'))) {
+    con$seed <- NULL
+  }
+  
+  trace <- con$trace
+  if(is.null(trace)) trace <- 0
+  
+  # turn-off blas multithread to run in parallel
+  if(!mthreads) {
+    sink("NUL")
+    RhpcBLASctl::blas_set_num_threads(1)
+    sink()
+  }
+  
+  n <- length(y)
+  ntau <-length(tau)
+  p <- ncol(X)
+  # create a coarse quantile grid for LP
+  sel.tau0 <- create_coarse_grid(tau,d)
+  tau0 <- tau[sel.tau0]
+  L <- length(tau0)
+  # create spline design matrix with knots provided by smooth.spline
+  sdm <- create_spline_matrix(tau0,tau)
+  K <- ncol(sdm$bsMat)
+  
+  # compute intial value of theta from spline smoothing of rq solution
+  spars <- NULL  
+  if(is.null(theta0)) {
+    if(is.null(beta.rq)) {
+      theta0 <- rep(0,p*K)
+    } else {
+      theta0 <- NULL
+      for(i in c(1:p)) {
+	    fit0 <- stats::smooth.spline(tau0,beta.rq[i,sel.tau0],spar=spar0)
+        theta0 <- c(theta0, fit0$fit$coef)
+	    spars <- c(spars,fit0$spar)
+      }
+      rm(fit0)
+    }
+  }
+  
+  # compute optimal solution theta
+  if( !(method %in% c("BFGS","ADAM","GRAD")) ) method <- "BFGS"
+  if(method=="ADAM") {
+    fit <- optim.adam(theta0,sqr.optim_obj,sqr.optim_dobj,y=y,X=X,tau0=tau0,sdm=sdm,spar=spar,
+               weighted=weighted,sg.rate=sg.rate,gr.m=gr.m,gr.v=gr.v,control=con)
+  } 
+  if (method=="GRAD") {
+    fit <- optim.grad(theta0,sqr.optim_obj,sqr.optim_dobj,y=y,X=X,tau0=tau0,sdm=sdm,spar=spar,
+               weighted=weighted,sg.rate=sg.rate,gr.m=gr.m,gr.v=gr.v,control=con)  
+  }
+  if (method=="BFGS") {
+    con$trace <- max(0,con$trace)
+    fit <- stats::optim(theta0,sqr.optim_obj,gr=sqr.optim_dobj,method="BFGS",y=y,X=X,tau0=tau0,sdm=sdm,spar=spar,
+               weighted=weighted,control=con)
+  }
+  
+  theta <- fit$par
+  
+  # map to interpolated regression solution
+  beta <- matrix(0,nrow=p,ncol=ntau)
+  for(ell in c(1:ntau)) {
+    Phi <- create_Phi_matrix(sdm$bsMat2[ell,],p)
+    beta[,ell] <- Phi %*% matrix(theta,ncol=1)
+  }
+
+  all.beta <- list()
+  if( (trace == -1) && (method %in% c('ADAM','GRAD')) ) {
+    for(i in c(1:length(fit$all.time))) {
+      all.beta[[i]] <- matrix(0,nrow=p,ncol=ntau)
+      for(ell in c(1:ntau)) {
+        Phi <- create_Phi_matrix(sdm$bsMat2[ell,],p)
+        all.beta[[i]][,ell] <- Phi %*% matrix(fit$all.par[,i],ncol=1)
+      }
+    }	  
+  }
+  
+  beta0<-NULL
+  if(return.beta0) {
+    # map to interpolated regression solution from theta0
+    beta0 <- matrix(0,nrow=p,ncol=ntau)
+    for(ell in c(1:ntau)) {
+      Phi <- create_Phi_matrix(sdm$bsMat2[ell,],p)
+      beta0[,ell] <- Phi %*% matrix(theta0,ncol=1)
+    } 
+  }
+  ##return(list(beta=beta,beta0=beta0,sel.tau0=sel.tau0,all.beta=all.beta,theta=theta,sdm=sdm,spars=spars,fit=fit))
+  return(list(beta=beta,all.beta=all.beta,spars=spars,fit=fit))
+}
+
 
