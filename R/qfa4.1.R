@@ -1,6 +1,6 @@
 # -- Library of R functions for Quantile-Frequency Analysis (QFA) --
 # by Ta-Hsin Li  (thl024@outlook.com)  October 30, 2022; April 8, 2023; August 21, 2023;
-# November 26, 2024; December 14, 2024
+# November 26, 2024; December 14, 2024; April 8, 2025
 
 #' Trigonometric Quantile Regression (TQR)
 #'
@@ -2159,6 +2159,7 @@ qspec.lw <- function(y,tau,y.qacf=NULL,M=NULL,method=c("none","gamm","sp"),spar=
 
 
 # version 4.0: modification of sqr.fit; add tsqr.fit, sqdft.fit, and sqdft
+# version 4.1: redefine aic and bic in sqr.fit; remove sic
 
 
 #' Spline Quantile Regression (SQR)
@@ -2175,7 +2176,7 @@ qspec.lw <- function(y,tau,y.qacf=NULL,M=NULL,method=c("none","gamm","sp"),spar=
 #' @param ztol zero tolerance parameter used to determine the effective dimensionality of the fit
 #' @return A list with the following elements:
 #'   \item{coefficients}{matrix of regression coefficients}
-#'   \item{crit}{sequence critera for smoothing parameter select: (AIC,BIC,SIC)}
+#'   \item{crit}{sequence critera for smoothing parameter select: (AIC,BIC)}
 #'   \item{np}{sequence of number of effective parameters}
 #'   \item{fid}{sequence of fidelity measure as quasi-likelihood}
 #'   \item{nit}{number of iterations}
@@ -2322,11 +2323,10 @@ sqr.fit <- function(X,y,tau,spar=1,d=1,weighted=FALSE,mthreads=TRUE,ztol=1e-05) 
 	np[ell] <- sum( abs(resid) < ztol )
 	fid[ell] <- mean(Rho(resid,tau0[ell]))
   }
-  sic <- n * log( mean(fid) ) + 0.5 * log(n) * mean(np)
-  bic <- n * log( mean(fid) ) + log(n) * mean(np)
-  aic <- n * log( mean(fid) ) + 2 * mean(np)
-  crit <- c(aic,bic,sic)
-  names(crit) <- c("AIC","BIC","SIC")
+  bic <- 2 * n * log( mean(fid) ) + log(n) * mean(np)
+  aic <- 2 * n * log( mean(fid) ) + 2 * mean(np)
+  crit <- c(aic,bic)
+  names(crit) <- c("AIC","BIC")
   return(list(coefficients=beta,crit=crit,np=np,fid=fid,nit=nit))
 }
 
@@ -2346,7 +2346,7 @@ sqr.fit <- function(X,y,tau,spar=1,d=1,weighted=FALSE,mthreads=TRUE,ztol=1e-05) 
 #' @param d subsampling rate of quantile levels (default = 1)
 #' @param weighted if \code{TRUE}, penalty function is weighted (default = \code{FALSE})
 #' @param mthreads if \code{FALSE}, set \code{RhpcBLASctl::blas_set_num_threads(1)} (default = \code{TRUE})
-#' @param method a criterion for smoothing parameter selection if \code{spar=NULL} (\code{"AIC"}, \code{"BIC"}, or \code{"SIC"})
+#' @param method a criterion for smoothing parameter selection if \code{spar=NULL} (\code{"AIC"} or \code{"BIC"})
 #' @param ztol a zero tolerance parameter used to determine the effective dimensionality of the fit
 #' @param data a data.frame in which to interpret the variables named in the formula
 #' @param subset an optional vector specifying a subset of observations to be used
@@ -2369,7 +2369,7 @@ sqr.fit <- function(X,y,tau,spar=1,d=1,weighted=FALSE,mthreads=TRUE,ztol=1e-05) 
 #' plot(tau,fit$coef[2,],xlab="Quantile Level",ylab="Coeff1")
 #' lines(tau,fit.sqr$coef[2,])
 sqr <- function (formula, tau = seq(0.1,0.9,0.2), spar = NULL, d=1, data, subset, na.action, 
-    model = TRUE, weighted = FALSE, mthreads = TRUE, method=c("AIC","BIC","SIC"), ztol = 1e-05) 
+    model = TRUE, weighted = FALSE, mthreads = TRUE, method=c("AIC","BIC"), ztol = 1e-05) 
 {	
     contrasts <- NULL 
     call <- match.call()
@@ -2393,20 +2393,16 @@ sqr <- function (formula, tau = seq(0.1,0.9,0.2), spar = NULL, d=1, data, subset
     vnames <- dimnames(X)[[2]]
 	
 	method <- method[1]
-	if(!(method %in% c("AIC","BIC","SIC"))) method <- "AIC" 
+	if(!(method %in% c("AIC","BIC"))) method <- "AIC" 
 	
     Rho <- function(u, tau) u * (tau - (u < 0))
 	
     sqr_obj <- function(spar,X,y,tau,d,method,weighted=FALSE,mthreads=FALSE,ztol=1e-05) {
 	    crit <- sqr.fit(X,y,tau,spar,d=d,weighted=weighted,mthreads=mthreads,ztol=ztol)$crit
-        if(method=="SIC") {
-	      crit[3]
-	    } else {
-	      if(method=="BIC") {
-		    crit[2]
-	      } else { 
-	        crit[1]
-          }
+	    if(method=="BIC") {
+		  crit[2]
+	    } else { 
+	      crit[1]
 	    }
     }
 
@@ -2539,8 +2535,8 @@ tsqr.fit <- function(y,f0,tau,spar=1,d=1,weighted=FALSE,mthreads=TRUE,prepared=T
 #' @param cl pre-existing cluster for repeated parallel computing (default = \code{NULL})
 #' @return A list with the following elements:
 #'   \item{coefficients}{matrix of regression coefficients}
-#'   \item{qdft}{matrix or array of the spline quantile discrete Fourier transform of \code{y}}
-#'   \item{crit}{criteria for smoothing parameter selection: (AIC,BIC,SIC)}
+#'   \item{qdft}{matrix or array of the spline quantile discrete Fouror BICier transform of \code{y}}
+#'   \item{crit}{criteria for smoothing parameter selection: (AIC,BIC)}
 #' @import 'stats'
 #' @import 'splines'
 #' @import 'RhpcBLASctl'
@@ -2641,7 +2637,7 @@ sqdft.fit <- function(y,tau,spar=1,d=1,weighted=FALSE,ztol=1e-05,n.cores=1,cl=NU
   # extend qdft to f=0 and f in (0.5,1) 
   out <- extend_qdft(y,tau,result,sel.f)
 
-  out2 <- rep(0,3)
+  out2 <- rep(0,2)
   for(k in c(1:nc)) {
     for(j in c(1:nf)) out2 <- out2 + result2[[k]][[j]]
   }
@@ -2662,14 +2658,14 @@ sqdft.fit <- function(y,tau,spar=1,d=1,weighted=FALSE,ztol=1e-05,n.cores=1,cl=NU
 #' @param spar smoothing parameter: if \code{spar=NULL}, smoothing parameter is selected by \code{method}
 #' @param d subsampling rate of quantile levels (default = 1)
 #' @param weighted if \code{TRUE}, penalty function is weighted (default = \code{FALSE})
-#' @param method crietrion for smoothing parameter selection when \code{spar=NULL} (\code{"AIC"}, \code{"BIC"}, or \code{"SIC"})
+#' @param method crietrion for smoothing parameter selection when \code{spar=NULL} (\code{"AIC"} or \code{"BIC"})
 #' @param ztol zero tolerance parameter used to determine the effective dimensionality of the fit
 #' @param n.cores number of cores for parallel computing (default = 1)
 #' @param cl pre-existing cluster for repeated parallel computing (default = \code{NULL})
 #' @return A list with the following elements:
 #'   \item{coefficients}{matrix of regression coefficients}
 #'   \item{qdft}{matrix or array of the spline quantile discrete Fourier transform of \code{y}}
-#'   \item{crit}{criteria for smoothing parameter selection: (AIC,BIC,SIC)}
+#'   \item{crit}{criteria for smoothing parameter selection: (AIC,BIC)}
 #' @import 'stats'
 #' @import 'splines'
 #' @import 'RhpcBLASctl'
@@ -2682,20 +2678,16 @@ sqdft.fit <- function(y,tau,spar=1,d=1,weighted=FALSE,ztol=1e-05,n.cores=1,cl=NU
 #' y <- stats::arima.sim(list(order=c(1,0,0), ar=0.5), n=64)
 #' tau <- seq(0.1,0.9,0.05)
 #' y.sqdft <- sqdft(y,tau,spar=NULL,d=4,metho="AIC")$qdft
-sqdft <- function(y,tau,spar=NULL,d=1,weighted=FALSE,method=c("AIC","BIC","SIC"),
+sqdft <- function(y,tau,spar=NULL,d=1,weighted=FALSE,method=c("AIC","BIC"),
                   ztol=1e-05,n.cores=1,cl=NULL) 
 {
 
-  sqdft_obj <- function(spar,y,tau,d,weighted=FALSE,method=c("AIC","BIC","SIC"),ztol=1e-05,n.cores=1,cl=NULL) {
+  sqdft_obj <- function(spar,y,tau,d,weighted=FALSE,method=c("AIC","BIC"),ztol=1e-05,n.cores=1,cl=NULL) {
     crit <- sqdft.fit(y,tau,spar=spar,d=d,weighted=weighted,ztol=ztol,n.cores=n.cores,cl=cl)$crit
     if(method[1]=="BIC") {
 	  crit[2]
 	} else {
-	  if(method[1]=="SIC") {
-	    crit[3]
-	  } else {
-	    crit[1]
-	  }
+	  crit[1]
 	}
   }
   
@@ -3344,3 +3336,67 @@ sqr.fit.optim <- function(X,y,tau,spar=0,d=1,weighted=FALSE,method=c("BFGS","ADA
 }
 
 
+
+sqr.plot<-function(summary.rq,summary.sqr=NULL,summary.sqrb=NULL,type="l",
+  lty=c(1,2),lwd=c(1.5,1),cex=0.25,pch=1,col=c(2,1),idx=NULL,plot.rq=TRUE,plot.ls=TRUE,
+  Ylim=NULL,mfrow=NULL,lab=c(10,7,7),mar=c(2,3,2,1)+0.1,las=1) {
+  par0 <- par("mfrow","lab","mar","las")
+  p <- dim(summary.rq[[1]]$coefficients)[1]
+  nq <- length(summary.rq)
+  # replace standard error by rq
+  tau <- rep(0,nq)
+  cf.rq <- matrix(0,p,nq)
+  if(!is.null(summary.sqrb)) cf.sqrb<- matrix(0,p,nq)
+  for(j in c(1:nq)) {
+    tau[j] <- summary.rq[[j]]$tau
+	cf.rq[,j] <- summary.rq[[j]]$coefficients[,1]
+    if(!is.null(summary.sqrb)) summary.sqrb[[j]]$coefficients[,2] <- summary.rq[[j]]$coefficients[,2]
+	if(!is.null(summary.sqrb)) cf.sqrb[,j] <- summary.sqrb[[j]]$coefficients[,1]
+  }
+  tmp.rq <- plot(summary.rq)
+  if(!is.null(summary.sqr)) tmp <- plot(summary.sqr)
+  if(is.null(mfrow) & is.null(idx))  { 
+    mfrow <- c( ceiling(sqrt(p)), ceiling(sqrt(p)))
+  } else {
+    if(!is.null(idx)) mfrow <- c(1,1)
+  }
+  if(is.null(lab)) lab <- c(10,7,7)
+  if(is.null(mar)) mar=c(2,3,2,1)+0.1
+  if(is.null(las)) las <- 1
+  par(las=las,mar=mar,mfrow=mfrow, lab=lab)
+  if(!is.null(idx)) {
+    pp <- idx
+  } else {
+    pp <- c(1:p)
+  }
+  ylim <- matrix(NA,2,p)
+  for(i in pp) {
+    if(!is.null(summary.sqr)) {
+      ci <- tmp[[1]][i,,]
+	} else {
+	  ci <- tmp.rq[[1]][i,,]
+	}
+	if(is.null(Ylim)) {
+	  if(!is.null(summary.sqr)) {
+	    rg <- range(tmp$Ylim[,i],cf.rq[i,])
+	  } else {
+	    rg <- range(tmp.rq$Ylim[,i])
+	  }
+	} else {
+	  rg <- Ylim[,i] 
+	}
+	ylim[,i] <- rg
+    plot(tau,ci[1,1:nq],ylim=rg,type='n',ylab=NA,xlab=NA)
+    tmp.x <- c(tau,rev(tau))
+    tmp.y <- c(ci[3,1:nq],rev(ci[2,1:nq]))
+    polygon(tmp.x, tmp.y, col = "grey",border=NA)
+	if(plot.rq) points(tau,cf.rq[i,],cex=cex,pch=pch)
+    if(plot.ls) abline(h=ci[,nq+1],lty=c(2,3,3))
+	if(!is.null(summary.sqrb)) lines(tau,cf.sqrb[i,],type=type,lwd=lwd[2],col=col[2],lty=lty[2])
+	if(!is.null(summary.sqr)) lines(tau,ci[1,1:nq],type=type,lwd=lwd[1],col=col[1],lty=lty[1])
+	title(rownames(summary.rq[[1]]$coef)[i])
+  }
+  par(mfrow = par0$mfrow, mar = par0$mar, lab=par0$lab, las=par0$las)
+  Ylim <- ylim
+  invisible(Ylim)
+}
